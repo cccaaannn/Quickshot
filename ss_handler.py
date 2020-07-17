@@ -110,7 +110,7 @@ class ss_handler():
         save_path = self.__path_handler()
 
         if(not save_path):
-            return False, "path error"
+            return False, "ss could not be saved: path handler returned error"
 
 
         # format date
@@ -139,7 +139,7 @@ class ss_handler():
 
 
         except:
-            return False, "ss error"
+            return False, "ss could not be saved: ss handler returned error"
 
 
         return True, ss_full_name 

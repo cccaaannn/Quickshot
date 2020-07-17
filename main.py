@@ -4,4 +4,4 @@ import sys
 
 app = QApplication(sys.argv)
 frame = Sshot()
-sys.exit(app.exec())
+sys.exit(app.exec()) 

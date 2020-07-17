@@ -1,13 +1,17 @@
+# pyqt5
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QMessageBox, QSizeGrip                   
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QFont
 from PyQt5 import QtCore
 
+# other imports
 from pynput import keyboard
 import json
 import sys
 
+# my classes
+from global_keylistener import global_keylistener
 from ss_handler import ss_handler
 
 
@@ -23,7 +27,7 @@ class Sshot(QWidget):
 
         if(not is_cfg_ok):
             # show alert
-            self.show_alert_popup("Cfg file is broken")
+            self.show_alert_popup("There is a problem with cfg file")
             sys.exit()
         else:
             
@@ -44,10 +48,11 @@ class Sshot(QWidget):
                                 png_compression_level = self.png_compression_level, 
                                 multi_screen = self.multi_screen)
 
-            # start global keylistener
-            self.global_keylistener_thread = keyboard.GlobalHotKeys({self.ss_hotkey : self.take_ss, self.hide_hotkey : self.hide_show})
+            
+            self.global_keylistener_thread = global_keylistener(self.ss_hotkey, self.hide_hotkey)
             self.global_keylistener_thread.start()
-
+            self.global_keylistener_thread.ss_trigger.connect(self.take_ss)
+            self.global_keylistener_thread.hide_trigger.connect(self.hide_show)
 
 
     def set_options(self):
@@ -60,8 +65,6 @@ class Sshot(QWidget):
             self.opacity = cfg["general"]["opacity"]
             self.background_color = cfg["general"]["background_color"]
             self.accent_color = cfg["general"]["accent_color"]
-            self.error_background_color = cfg["general"]["error_background_color"]
-            self.error_accent_color = cfg["general"]["error_accent_color"]
             self.ss_hotkey = cfg["general"]["ss_hotkey"]
             self.hide_hotkey = cfg["general"]["hide_hotkey"]
 
@@ -94,6 +97,7 @@ class Sshot(QWidget):
         # init ui elements
         self.layouts()
         self.labels()
+        self.buttons()
         self.sizegrips()
         self.set_up_ui()
 
@@ -101,12 +105,10 @@ class Sshot(QWidget):
 
     def init_variables(self):
         """init variables"""
-        self.window_style = "background-color: {}; border: 1px solid {};".format(self.background_color, self.accent_color)
+        self.window_style = "background-color: {}; border: 2px solid {};".format(self.background_color, self.accent_color)
         self.label_style = "background-color: {}; color: {}; border: 0px".format(self.background_color, self.accent_color)
-
-        self.error_window_style = "background-color: {}; border: 1px solid {};".format(self.error_background_color, self.error_accent_color)
-        self.error_label_style = "background-color: {}; color: {}; border: 0px".format(self.error_background_color, self.error_accent_color)
-
+        self.button_style = "background-color: {0}; color: {1}; padding: 3px; border: 1px solid {1};".format(self.background_color, self.accent_color)
+        
 
 
     # ui functions
@@ -119,6 +121,8 @@ class Sshot(QWidget):
         self.horizontal_layout_top.addWidget(self.sizegrip2)
 
         self.horizontal_layout_bottom.addWidget(self.sizegrip3)
+        self.horizontal_layout_bottom.addStretch()
+        self.horizontal_layout_bottom.addWidget(self.ss_button)
         self.horizontal_layout_bottom.addStretch()
         self.horizontal_layout_bottom.addWidget(self.sizegrip4)
 
@@ -140,8 +144,18 @@ class Sshot(QWidget):
         self.info_label = QLabel()
         self.info_label.setText("Sshot")
         self.info_label.resize(150,150)
-        self.info_label.setFont(QFont('Arial', 10)) 
+        self.info_label.setFont(QFont('Arial', 12)) 
         self.info_label.setStyleSheet(self.label_style)
+
+    def buttons(self):
+        """adds buttons"""
+        self.ss_button = QPushButton(self)
+        self.ss_button.setText("shot")
+        self.ss_button.setObjectName("ss_button")
+        self.ss_button.setFont(QFont('Arial', 12)) 
+        self.ss_button.setStyleSheet(self.button_style)
+        self.ss_button.clicked.connect(self.on_button_click)
+
 
     def sizegrips(self):
         """adds sizegrips"""
@@ -172,7 +186,14 @@ class Sshot(QWidget):
     def keyPressEvent(self, event):
         if(event.key() == Qt.Key_Escape):
             sys.exit()
-    
+
+    def on_button_click(self):
+        """button click listeners"""
+        sender = self.sender()
+
+        if(sender.objectName() == "ss_button"):
+            self.take_ss()
+
 
     # other
     def take_ss(self):
@@ -189,10 +210,10 @@ class Sshot(QWidget):
 
 
         if(not ss_state):
-            self.on_ss_error(ss_info)
-
+            self.show_alert_popup(ss_info)
         else:
-            self.on_ss_success(ss_info)
+            pass
+            # self.on_ss_success(ss_info)
     
     def hide_show(self):
         if(self.isVisible()):
@@ -201,7 +222,11 @@ class Sshot(QWidget):
             self.show()
 
     def show_alert_popup(self, alert_str):
-        QMessageBox.about(self, "Alert", alert_str)
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setWindowTitle("Alert")
+        msg.setText(alert_str)
+        msg.exec()
 
 
     def on_ss_success(self, ss_info):
@@ -209,10 +234,10 @@ class Sshot(QWidget):
         self.setStyleSheet(self.window_style)
         self.info_label.setStyleSheet(self.label_style)
 
-    def on_ss_error(self, ss_info):
-        self.info_label.setText(ss_info)
-        self.setStyleSheet(self.error_window_style)
-        self.info_label.setStyleSheet(self.error_label_style)
+    # def on_ss_error(self, ss_info):
+    #     self.info_label.setText(ss_info)
+    #     self.setStyleSheet(self.error_window_style)
+    #     self.info_label.setStyleSheet(self.error_label_style)
 
 
     
