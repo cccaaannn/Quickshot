@@ -3,5 +3,5 @@ from Sshot import Sshot
 import sys
 
 app = QApplication(sys.argv)
-frame = Sshot()
-sys.exit(app.exec()) 
+frame = Sshot(cfg_path="options.cfg")
+sys.exit(app.exec())  

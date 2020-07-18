@@ -5,6 +5,7 @@ import time
 class global_keylistener(QThread):
     ss_trigger = pyqtSignal()
     hide_trigger = pyqtSignal()
+    error_trigger = pyqtSignal()
 
     def __init__(self, ss_key, hide_key):
         super().__init__()
@@ -17,6 +18,10 @@ class global_keylistener(QThread):
 
     def emit_hide_trigger(self):
         self.hide_trigger.emit()
+
+    def emit_error_trigger(self):
+        self.error_trigger.emit()
+
     
     def run(self):
         try: 
@@ -24,7 +29,7 @@ class global_keylistener(QThread):
             self.global_keylistener_thread.start()
             print("global listener started")
         except:
-            print("thread creation error")
+            self.emit_error_trigger()
 
 
 

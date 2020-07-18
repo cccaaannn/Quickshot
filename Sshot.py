@@ -9,6 +9,7 @@ from PyQt5 import QtCore
 from pynput import keyboard
 import json
 import sys
+import os
 
 # my classes
 from global_keylistener import global_keylistener
@@ -22,40 +23,41 @@ class Sshot(QWidget):
 
         # read cfg file
         self.cfg_path = cfg_path
-        is_cfg_ok = self.set_options()
+        self.set_options()
         
 
-        if(not is_cfg_ok):
-            # show alert
-            self.show_alert_popup("There is a problem with cfg file")
-            sys.exit()
-        else:
-            
-            # init variables
-            self.init_variables()
-            # start ui
-            self.init_ui()
+        self.init_variables()
+        self.init_ui()
 
-            # instantiate ss_handler
-            self.ss_h = ss_handler()
-            self.ss_h.set_options(save_path = self.save_path, 
-                                create_root_file = self.create_root_file, 
-                                before_ss_name = self.before_ss_name, 
-                                after_ss_name = self.after_ss_name, 
-                                before_number = self.before_number, 
-                                after_number = self.after_number, 
-                                date_formatting = self.date_formatting, 
-                                png_compression_level = self.png_compression_level, 
-                                multi_screen = self.multi_screen)
+        # instantiate ss_handler
+        self.ss_h = ss_handler()
+        self.ss_h.set_options(save_path = self.save_path, 
+                            create_root_file = self.create_root_file, 
+                            before_ss_name = self.before_ss_name, 
+                            after_ss_name = self.after_ss_name, 
+                            before_number = self.before_number, 
+                            after_number = self.after_number, 
+                            date_formatting = self.date_formatting,
+                            use_system_local_date_naming = self.use_system_local_date_naming,
+                            png_compression_level = self.png_compression_level, 
+                            multi_screen = self.multi_screen)
 
-            
-            self.global_keylistener_thread = global_keylistener(self.ss_hotkey, self.hide_hotkey)
-            self.global_keylistener_thread.start()
-            self.global_keylistener_thread.ss_trigger.connect(self.take_ss)
-            self.global_keylistener_thread.hide_trigger.connect(self.hide_show)
+        # start and set up global keylistener thread
+        self.global_keylistener_thread = global_keylistener(self.ss_hotkey, self.hide_hotkey)
+        self.global_keylistener_thread.start()
+        self.global_keylistener_thread.ss_trigger.connect(self.take_ss)
+        self.global_keylistener_thread.hide_trigger.connect(self.hide_show)
+        self.global_keylistener_thread.error_trigger.connect(self.global_keylistener_error)
+        
+        
 
 
+
+    # set up frame and options
     def set_options(self):
+        """Read cfg file and makes assignment to local variables
+        shows error popup if cfg file has errors
+        """
         try:
             # read cfg file
             with open(self.cfg_path,"r") as file:
@@ -69,29 +71,29 @@ class Sshot(QWidget):
             self.hide_hotkey = cfg["general"]["hide_hotkey"]
 
             # ss options
-            self.save_path = cfg["ss_options"]["save_path"]
+            self.save_path = os.path.normpath(cfg["ss_options"]["save_path"]) # convert to path
             self.create_root_file = cfg["ss_options"]["create_root_file"]
             self.before_ss_name = cfg["ss_options"]["before_ss_name"]
             self.after_ss_name = cfg["ss_options"]["after_ss_name"]
             self.before_number = cfg["ss_options"]["before_number"]
             self.after_number = cfg["ss_options"]["after_number"]
             self.date_formatting = cfg["ss_options"]["date_formatting"]
+            self.use_system_local_date_naming = cfg["ss_options"]["use_system_local_date_naming"]
             self.png_compression_level = cfg["ss_options"]["png_compression_level"]
             self.multi_screen = cfg["ss_options"]["multi_screen"]
 
-            return True
         except Exception as e:
             print(e)
-            return False
+
+            self.show_alert_popup("There is a problem with cfg file")
+            sys.exit()
 
     def init_ui(self):
         """inits ui"""
 
-        # set colors
+        # set main frame options
         self.setStyleSheet(self.window_style)
-        # opacity
         self.setWindowOpacity(self.opacity)
-        # always on top and frameless
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
 
         # init ui elements
@@ -100,7 +102,6 @@ class Sshot(QWidget):
         self.buttons()
         self.sizegrips()
         self.set_up_ui()
-
         self.show()
 
     def init_variables(self):
@@ -111,7 +112,7 @@ class Sshot(QWidget):
         
 
 
-    # ui functions
+    # add ui elements
     def set_up_ui(self):
         """set up ui"""
         self.horizontal_layout_top.addWidget(self.sizegrip1)
@@ -156,7 +157,6 @@ class Sshot(QWidget):
         self.ss_button.setStyleSheet(self.button_style)
         self.ss_button.clicked.connect(self.on_button_click)
 
-
     def sizegrips(self):
         """adds sizegrips"""
         self.sizegrip1 = QSizeGrip(self)
@@ -173,7 +173,6 @@ class Sshot(QWidget):
 
 
 
-
     # event listeners
     def mousePressEvent(self, event):
         self.oldPos = event.globalPos()
@@ -184,20 +183,40 @@ class Sshot(QWidget):
         self.oldPos = event.globalPos()
 
     def keyPressEvent(self, event):
+        """regular keylistener"""
         if(event.key() == Qt.Key_Escape):
             sys.exit()
 
     def on_button_click(self):
-        """button click listeners"""
+        """button click listener"""
         sender = self.sender()
 
         if(sender.objectName() == "ss_button"):
             self.take_ss()
 
 
-    # other
+
+    # error handling
+    def show_alert_popup(self, alert_str):
+        """shows alert popup with given message"""
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setWindowTitle("Alert")
+        msg.setText(alert_str)
+        msg.exec()
+
+    def global_keylistener_error(self):
+        """global keylistener error function"""
+        self.show_alert_popup("Hotkey error, please fix hotkeys on cfg file")
+        sys.exit()
+
+
+
+    # functionality
     def take_ss(self):
-        # if frame is visible take a partial ss if not take all screen
+        """takes ss, uses ss_handler
+        if frame is visible takes a partial ss if not takes all screen
+        """ 
         if(self.isVisible()):
             bbox = self.geometry().getRect()
             bbox = {"top": bbox[1], "left" : bbox[0], "width" : bbox[2], "height" : bbox[3]}
@@ -208,36 +227,14 @@ class Sshot(QWidget):
         else:
             ss_state, ss_info = self.ss_h.take_ss()
 
-
+        # on error
         if(not ss_state):
             self.show_alert_popup(ss_info)
-        else:
-            pass
-            # self.on_ss_success(ss_info)
     
     def hide_show(self):
+        """hide show frame function for global keylistener"""
         if(self.isVisible()):
             self.hide()
         else:
             self.show()
 
-    def show_alert_popup(self, alert_str):
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
-        msg.setWindowTitle("Alert")
-        msg.setText(alert_str)
-        msg.exec()
-
-
-    def on_ss_success(self, ss_info):
-        self.info_label.setText("saved")
-        self.setStyleSheet(self.window_style)
-        self.info_label.setStyleSheet(self.label_style)
-
-    # def on_ss_error(self, ss_info):
-    #     self.info_label.setText(ss_info)
-    #     self.setStyleSheet(self.error_window_style)
-    #     self.info_label.setStyleSheet(self.error_label_style)
-
-
-    

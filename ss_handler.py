@@ -1,8 +1,8 @@
 from datetime import datetime
 import mss.tools
+import locale
 import mss
 import os
-
 
 
 class ss_handler():
@@ -19,6 +19,7 @@ class ss_handler():
     before_number = "(", 
     after_number = ")", 
     date_formatting = "%y-%m-%d_%H-%M", 
+    use_system_local_date_naming = True,
     png_compression_level = -1, 
     multi_screen = False):
         
@@ -37,6 +38,9 @@ class ss_handler():
         self.png_compression_level = png_compression_level
 
         self.multi_screen = multi_screen
+
+        if(use_system_local_date_naming):
+            locale.setlocale(locale.LC_ALL, "")
 
 
     def __create_unique_file_name(self, file_path):
@@ -114,8 +118,12 @@ class ss_handler():
 
 
         # format date
-        now = datetime.now()
-        formatted_now = datetime.strftime(now, self.date_formatting)
+        try:
+            now = datetime.now()
+            formatted_now = datetime.strftime(now, self.date_formatting)
+        except Exception as e:
+            print(e)
+            return False, "ss could not be saved: date format is wrong"
 
         # create path
         temp_ss_name = "{0}{1}{2}{3}".format(self.before_ss_name, formatted_now, self.after_ss_name, ss_extension)
