@@ -1,12 +1,11 @@
 # pyqt5
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QMessageBox, QSizeGrip                   
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QMessageBox, QSizeGrip                
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QFont
 from PyQt5 import QtCore
 
 # other imports
-from pynput import keyboard
 import json
 import sys
 import os
