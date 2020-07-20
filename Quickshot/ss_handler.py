@@ -9,12 +9,12 @@ class ss_handler():
     def __init__(self):
         self.set_options()
 
-    
 
     def set_options(self, 
+    ss_extension = ".png",
     save_path = "HOME", 
-    create_root_file = "Sshot", 
-    before_ss_name = "ss_", 
+    create_root_file = "Qshot", 
+    before_ss_name = "qs_", 
     after_ss_name = "", 
     before_number = "(", 
     after_number = ")", 
@@ -23,6 +23,8 @@ class ss_handler():
     png_compression_level = -1, 
     multi_screen = False):
         
+        self.ss_extension = ss_extension
+
         self.save_path = save_path
 
         self.create_root_file = create_root_file
@@ -62,16 +64,12 @@ class ss_handler():
         return file_path
 
 
-    def __create_dir_if_not_exists(self, path):
-        if(not os.path.exists(path)):
-            os.makedirs(path)
-
-
     def __path_handler(self):
-    
-        # handle path
+        """handles path"""
+        # if path is set to HOME try to get desktop
         if(self.save_path == "HOME"):
-
+            
+            # windows
             if(os.name == "nt"):
                 save_path = os.getenv("HOMEPATH")
                 save_path = os.path.join(save_path, "Desktop")
@@ -84,12 +82,13 @@ class ss_handler():
                         save_path = os.getenv("HOMEPATH")
 
                         if(not save_path):
-                            return False
+                            return False, "Path error: could not get Desktop path, you can give it manually"
 
+            # other os
             else:
                 save_path = os.getenv("HOME")
                 if(not save_path):
-                    return False
+                    return False, "Path error: could not get Home path, you can give it manually"
 
         elif(self.save_path == ""):
             save_path = ""
@@ -98,39 +97,40 @@ class ss_handler():
             if(os.path.exists(self.save_path)):
                 save_path = self.save_path
             else:
-                return False
+                return False, "Path error: path does not exists"
                 
 
         # create root file
         if(self.create_root_file):
             save_path = os.path.join(save_path, self.create_root_file)
-            self.__create_dir_if_not_exists(save_path)
+            if(not os.path.exists(save_path)):
+                os.makedirs(save_path)
 
-        return save_path
+        return save_path, "Path constructed successfully"
 
 
     def to_jpg(self, raw_pixels, output = None):
-        """pil usage example from mss documentation"""
+        """Converts raw pixels to jpg
+        pil usage example from mss documentation"""
 
         # Create an Image
         temp_image = Image.new("RGB", raw_pixels.size)
         # Best solution: create a list(tuple(R, G, B), ...) for putdata()
         pixels = zip(raw_pixels.raw[2::4], raw_pixels.raw[1::4], raw_pixels.raw[0::4])
         temp_image.putdata(list(pixels))
-
+        
         if(output):
             temp_image.save(output)
         else:
             return temp_image
 
 
-    def take_ss(self, ss_bbox = None, ss_extension = ".png"):
+    def take_ss(self, ss_bbox = None):
         
         # get path
-        save_path = self.__path_handler()
-
+        save_path, path_info = self.__path_handler()
         if(not save_path):
-            return False, "ss could not be saved: path error"
+            return False, path_info
 
         # format date
         try:
@@ -141,7 +141,7 @@ class ss_handler():
             return False, "ss could not be saved: date format is wrong"
 
         # create path
-        temp_ss_name = "{0}{1}{2}{3}".format(self.before_ss_name, formatted_now, self.after_ss_name, ss_extension)
+        temp_ss_name = "{0}{1}{2}{3}".format(self.before_ss_name, formatted_now, self.after_ss_name, self.ss_extension)
         temp_ss_name = os.path.join(save_path, temp_ss_name)
         ss_full_name = self.__create_unique_file_name(temp_ss_name)
 
@@ -157,11 +157,13 @@ class ss_handler():
                     sct_img = sct.grab(sct.monitors[1])
 
                 # convert and save
-                if(ss_extension == ".png"):
+                if(self.ss_extension == ".png"):
                     sct.compression_level = self.png_compression_level
                     mss.tools.to_png(sct_img.rgb, sct_img.size, level = self.png_compression_level, output = ss_full_name)
-                elif(ss_extension == ".jpg"):
+                elif(self.ss_extension == ".jpg"):
                     self.to_jpg(sct_img, output = ss_full_name)
+                else:
+                    return False, "ss could not be saved: extension type is not supported"
 
 
         except Exception as e:
@@ -170,14 +172,5 @@ class ss_handler():
 
 
         return True, ss_full_name 
-
-
-
-
-
-# ss_h = ss_handler()
-# a = ss_h.take_ss(ss_bbox=(50,50,500,500))
-
-# print(a)
 
 

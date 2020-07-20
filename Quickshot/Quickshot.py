@@ -16,7 +16,7 @@ from global_keylistener import global_keylistener
 from ss_handler import ss_handler
 
 
-class Sshot(QWidget):
+class Qshot(QWidget):
 
     def __init__(self, cfg_path="options.cfg"):
         super().__init__()
@@ -52,6 +52,7 @@ class Sshot(QWidget):
             self.hide_hotkey = cfg["general"]["hide_hotkey"]
 
             # ss options
+            self.ss_extension = cfg["ss_options"]["ss_extension"]
             self.save_path = os.path.normpath(cfg["ss_options"]["save_path"]) # convert to path
             self.create_root_file = cfg["ss_options"]["create_root_file"]
             self.before_ss_name = cfg["ss_options"]["before_ss_name"]
@@ -87,9 +88,9 @@ class Sshot(QWidget):
 
     def init_variables(self):
         """init variables"""
-        self.window_style = "background-color: {}; border: 2px solid {};".format(self.background_color, self.accent_color)
-        self.label_style = "background-color: {}; color: {}; border: 0px".format(self.background_color, self.accent_color)
-        self.button_style = "background-color: {0}; color: {1}; padding: 3px; border: 1px solid {1};".format(self.background_color, self.accent_color)
+        self.window_style = "background-color: {0}; border: 2px solid {1};".format(self.background_color, self.accent_color)
+        self.label_style = "background-color: {0}; color: {1}; border: 0px".format(self.background_color, self.accent_color)
+        self.button_style = "background-color: {0}; color: {1}; padding: 2px; border: 1px solid {1};".format(self.background_color, self.accent_color)
 
     def init_global_keylistener(self):
         """inits global keylistener on a QThread"""
@@ -106,7 +107,8 @@ class Sshot(QWidget):
         ss_handler handles taking ss and saving it to given path
         """
         self.ss_handler = ss_handler()
-        self.ss_handler.set_options(save_path = self.save_path, 
+        self.ss_handler.set_options(ss_extension = self.ss_extension,
+                            save_path = self.save_path, 
                             create_root_file = self.create_root_file, 
                             before_ss_name = self.before_ss_name, 
                             after_ss_name = self.after_ss_name, 
@@ -150,7 +152,7 @@ class Sshot(QWidget):
     def labels(self):
         """adds labels"""
         self.info_label = QLabel()
-        self.info_label.setText("Sshot")
+        self.info_label.setText("Qshot")
         self.info_label.resize(150,150)
         self.info_label.setFont(QFont('Arial', 12)) 
         self.info_label.setStyleSheet(self.label_style)

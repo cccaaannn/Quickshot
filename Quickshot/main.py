@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import QApplication
-from Sshot import Sshot
+from Quickshot import Qshot
 import sys
 
 def main():
     app = QApplication(sys.argv)
-    frame = Sshot(cfg_path="options.cfg")
+    frame = Qshot(cfg_path="Quickshot/Qshot.cfg")
     sys.exit(app.exec())
 
 if __name__ == '__main__':
