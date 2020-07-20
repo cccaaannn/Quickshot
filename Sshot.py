@@ -21,41 +21,22 @@ class Sshot(QWidget):
     def __init__(self, cfg_path="options.cfg"):
         super().__init__()
 
-        # read cfg file
         self.cfg_path = cfg_path
         self.set_options()
         
-
         self.init_variables()
         self.init_ui()
 
-        # instantiate ss_handler
-        self.ss_h = ss_handler()
-        self.ss_h.set_options(save_path = self.save_path, 
-                            create_root_file = self.create_root_file, 
-                            before_ss_name = self.before_ss_name, 
-                            after_ss_name = self.after_ss_name, 
-                            before_number = self.before_number, 
-                            after_number = self.after_number, 
-                            date_formatting = self.date_formatting,
-                            use_system_local_date_naming = self.use_system_local_date_naming,
-                            png_compression_level = self.png_compression_level, 
-                            multi_screen = self.multi_screen)
+        self.init_global_keylistener()
+        self.init_ss_handler()
 
-        # start and set up global keylistener thread
-        self.global_keylistener_thread = global_keylistener(self.ss_hotkey, self.hide_hotkey)
-        self.global_keylistener_thread.start()
-        self.global_keylistener_thread.ss_trigger.connect(self.take_ss)
-        self.global_keylistener_thread.hide_trigger.connect(self.hide_show)
-        self.global_keylistener_thread.error_trigger.connect(self.global_keylistener_error)
-        
-        
+
 
 
 
     # set up frame and options
     def set_options(self):
-        """Read cfg file and makes assignment to local variables
+        """Reads cfg file and makes assignment to local variables
         shows error popup if cfg file has errors
         """
         try:
@@ -101,7 +82,7 @@ class Sshot(QWidget):
         self.labels()
         self.buttons()
         self.sizegrips()
-        self.set_up_ui()
+        self.setup_ui()
         self.show()
 
     def init_variables(self):
@@ -109,11 +90,37 @@ class Sshot(QWidget):
         self.window_style = "background-color: {}; border: 2px solid {};".format(self.background_color, self.accent_color)
         self.label_style = "background-color: {}; color: {}; border: 0px".format(self.background_color, self.accent_color)
         self.button_style = "background-color: {0}; color: {1}; padding: 3px; border: 1px solid {1};".format(self.background_color, self.accent_color)
-        
+
+    def init_global_keylistener(self):
+        """inits global keylistener on a QThread"""
+        self.global_keylistener_thread = global_keylistener(self.ss_hotkey, self.hide_hotkey)
+        self.global_keylistener_thread.start()
+
+        # connect emitters to local class functions
+        self.global_keylistener_thread.ss_trigger.connect(self.take_ss)
+        self.global_keylistener_thread.hide_trigger.connect(self.hide_show)
+        self.global_keylistener_thread.error_trigger.connect(self.global_keylistener_error)
+
+    def init_ss_handler(self):
+        """inits ss_handler 
+        ss_handler handles taking ss and saving it to given path
+        """
+        self.ss_handler = ss_handler()
+        self.ss_handler.set_options(save_path = self.save_path, 
+                            create_root_file = self.create_root_file, 
+                            before_ss_name = self.before_ss_name, 
+                            after_ss_name = self.after_ss_name, 
+                            before_number = self.before_number, 
+                            after_number = self.after_number, 
+                            date_formatting = self.date_formatting,
+                            use_system_local_date_naming = self.use_system_local_date_naming,
+                            png_compression_level = self.png_compression_level, 
+                            multi_screen = self.multi_screen)
+
 
 
     # add ui elements
-    def set_up_ui(self):
+    def setup_ui(self):
         """set up ui"""
         self.horizontal_layout_top.addWidget(self.sizegrip1)
         self.horizontal_layout_top.addStretch()
@@ -222,10 +229,10 @@ class Sshot(QWidget):
             bbox = {"top": bbox[1], "left" : bbox[0], "width" : bbox[2], "height" : bbox[3]}
             
             self.hide()
-            ss_state, ss_info = self.ss_h.take_ss(ss_bbox=bbox)
+            ss_state, ss_info = self.ss_handler.take_ss(ss_bbox=bbox)
             self.show()
         else:
-            ss_state, ss_info = self.ss_h.take_ss()
+            ss_state, ss_info = self.ss_handler.take_ss()
 
         # on error
         if(not ss_state):

@@ -3,7 +3,7 @@ import mss.tools
 import locale
 import mss
 import os
-
+from PIL import Image
 
 class ss_handler():
     def __init__(self):
@@ -109,13 +109,28 @@ class ss_handler():
         return save_path
 
 
-    def take_ss(self, ss_bbox = None, ss_extension = ".png"):
+    def to_jpg(self, raw_pixels, output = None):
+        """pil usage example from mss documentation"""
 
+        # Create an Image
+        temp_image = Image.new("RGB", raw_pixels.size)
+        # Best solution: create a list(tuple(R, G, B), ...) for putdata()
+        pixels = zip(raw_pixels.raw[2::4], raw_pixels.raw[1::4], raw_pixels.raw[0::4])
+        temp_image.putdata(list(pixels))
+
+        if(output):
+            temp_image.save(output)
+        else:
+            return temp_image
+
+
+    def take_ss(self, ss_bbox = None, ss_extension = ".png"):
+        
+        # get path
         save_path = self.__path_handler()
 
         if(not save_path):
-            return False, "ss could not be saved: path handler returned error"
-
+            return False, "ss could not be saved: path error"
 
         # format date
         try:
@@ -133,20 +148,24 @@ class ss_handler():
         # take ss
         try:
             with mss.mss() as sct:
-                sct.compression_level = self.png_compression_level
 
-                if(self.multi_screen):
-                    sct.shot(mon = -1, output = ss_full_name)
+                if(ss_bbox):
+                    sct_img = sct.grab(ss_bbox)
+                elif(self.multi_screen):
+                    sct_img = sct.grab(sct.monitors[0])
                 else:
-                    if(ss_bbox):
-                        im = sct.grab(ss_bbox)
-                    else:
-                        im = sct.grab(sct.monitors[1])
+                    sct_img = sct.grab(sct.monitors[1])
 
-                    mss.tools.to_png(im.rgb, im.size, level = self.png_compression_level, output = ss_full_name)
+                # convert and save
+                if(ss_extension == ".png"):
+                    sct.compression_level = self.png_compression_level
+                    mss.tools.to_png(sct_img.rgb, sct_img.size, level = self.png_compression_level, output = ss_full_name)
+                elif(ss_extension == ".jpg"):
+                    self.to_jpg(sct_img, output = ss_full_name)
 
 
-        except:
+        except Exception as e:
+            print(e)
             return False, "ss could not be saved: ss handler returned error"
 
 
@@ -160,18 +179,5 @@ class ss_handler():
 # a = ss_h.take_ss(ss_bbox=(50,50,500,500))
 
 # print(a)
-
-
-
-# from PIL import Image
-
-# im = Image.open("Ba_b_do8mag_c6_big.png")
-# rgb_im = im.convert('RGB')
-# rgb_im.save('colors.jpg')
-
-
-
-
-
 
 
