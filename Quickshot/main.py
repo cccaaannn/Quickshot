@@ -3,12 +3,12 @@ from PyQt5.QtGui import QIcon
 from Quickshot import Qshot
 import sys
 
-def build_application():
+def build_application(cfg_path, tray_icon_path):
     app = QApplication(sys.argv)
 
 
     # instantiate frame
-    frame = Qshot(cfg_path="Quickshot/Qshot.cfg")
+    frame = Qshot(cfg_path=cfg_path)
 
     # create tray menu
     menu = QMenu()
@@ -22,7 +22,7 @@ def build_application():
     exit_action.triggered.connect(app.quit)
 
     # create tray
-    tray_icon = QSystemTrayIcon(QIcon("icons/3.ico"), parent = app)
+    tray_icon = QSystemTrayIcon(QIcon(tray_icon_path), parent = app)
     tray_icon.setToolTip("Quickshot")
     tray_icon.setContextMenu(menu)
     tray_icon.show()
@@ -33,4 +33,11 @@ def build_application():
 
 
 if __name__ == '__main__':
-    build_application()
+    build_application("Quickshot/cfg/Qshot.cfg", "Quickshot/icons/1.ico")
+
+    # pyinstaller
+    # build_application("cfg/Qshot.cfg", "icons/1.ico")
+
+
+
+
