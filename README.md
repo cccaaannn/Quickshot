@@ -15,14 +15,11 @@ ___
 
 ## Color examples
 
-<img src="readme_images/example1.png" alt="drawing" width="250"/>
-<img src="readme_images/example2.png" alt="drawing" width="250"/>
+<img src="readme_images/example1.png" alt="drawing" width="250"/><img src="readme_images/example2.png" alt="drawing" width="250"/>
 <br/>
-<img src="readme_images/example3.png" alt="drawing" width="250"/>
-<img src="readme_images/example4.png" alt="drawing" width="250"/>
+<img src="readme_images/example3.png" alt="drawing" width="250"/><img src="readme_images/example4.png" alt="drawing" width="250"/>
 <br/>
-<img src="readme_images/example5.png" alt="drawing" width="250"/>
-<img src="readme_images/example6.png" alt="drawing" width="250"/>
+<img src="readme_images/example5.png" alt="drawing" width="250"/><img src="readme_images/example6.png" alt="drawing" width="250"/>
 <br/>
 
 ## Configurations
