@@ -1,5 +1,5 @@
 # pyqt5
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QMessageBox, QSizeGrip                
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QMessageBox, QSizeGrip, QMenu            
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QFont
@@ -11,26 +11,26 @@ import sys
 import os
 
 # my classes
+from Qshot_settings import Qshot_settings, start_settings_with_event_loop
 from global_keylistener import global_keylistener
 from ss_handler import ss_handler
 
-
 class Qshot(QWidget):
 
-    def __init__(self, cfg_path="options.cfg"):
+    def __init__(self, cfg_path="options.cfg", icon_path="1.ico"):
         super().__init__()
 
         self.cfg_path = cfg_path
+        self.icon_path = icon_path
         self.set_options()
         
         self.init_variables()
         self.init_ui()
 
+        self.init_Qshot_settings()
         self.init_global_keylistener()
         self.init_ss_handler()
-
-
-
+        
 
 
     # set up frame and options
@@ -65,8 +65,8 @@ class Qshot(QWidget):
 
         except Exception as e:
             print(e)
-
             self.show_alert_popup("There is a problem with cfg file")
+            start_settings_with_event_loop(self.cfg_path, self.icon_path) # start settings with its own event loop
             sys.exit()
 
     def init_ui(self):
@@ -90,6 +90,10 @@ class Qshot(QWidget):
         self.window_style = "background-color: {0}; border: 2px solid {1};".format(self.background_color, self.accent_color)
         self.label_style = "background-color: {0}; color: {1}; border: 0px".format(self.background_color, self.accent_color)
         self.button_style = "background-color: {0}; color: {1}; padding: 2px; border: 1px solid {1};".format(self.background_color, self.accent_color)
+
+        self.background_color_temp = self.background_color
+        self.accent_color_temp = self.accent_color
+
 
     def init_global_keylistener(self):
         """inits global keylistener on a QThread"""
@@ -118,6 +122,12 @@ class Qshot(QWidget):
                             png_compression_level = self.png_compression_level, 
                             multi_screen = self.multi_screen)
 
+    def init_Qshot_settings(self):
+        """intits Qshot settings and assigns local functions to emitters"""
+        self.Qs_settings = Qshot_settings(self.cfg_path, self.icon_path)
+        self.Qs_settings.oppcity_emitter.connect(self.change_opacity)
+        self.Qs_settings.background_color_emitter.connect(self.change_background_color)
+        self.Qs_settings.accent_color_emitter.connect(self.change_accent_color)
 
 
     # add ui elements
@@ -179,6 +189,24 @@ class Qshot(QWidget):
         self.sizegrip4 = QSizeGrip(self)
         self.sizegrip4.setVisible(True)
 
+    def contextMenuEvent(self, event):
+        self.context_menu = QMenu()
+
+        take_ss_action = self.context_menu.addAction("Take ss")
+        hide_show_action = self.context_menu.addAction("Hide/Show")
+        settings = self.context_menu.addAction("Settings")
+        exit_action = self.context_menu.addAction("Exit")
+
+        action = self.context_menu.exec_(self.mapToGlobal(event.pos()))
+
+        if(action == take_ss_action):
+            self.take_ss()
+        elif(action == hide_show_action):
+            self.hide_show()
+        elif(action == settings):
+            self.show_settings()
+        elif(action == exit_action):
+            sys.exit()
 
 
     # event listeners
@@ -215,12 +243,60 @@ class Qshot(QWidget):
 
     def global_keylistener_error(self):
         """global keylistener error function"""
-        self.show_alert_popup("Hotkey error, please fix hotkeys on cfg file")
-        sys.exit()
+        self.show_alert_popup("Hotkey error, please enter valid hotkeys or reset settings")
+        self.show_settings()
+
+
+    
+    # settings functions
+    def show_settings(self):
+        """starts or shows settings frame 
+        settings frame is not starts with main frame to increase startup speed.
+        """
+        if(not self.Qs_settings.is_settings_started):
+            self.Qs_settings.start_settings()
+        else:
+            self.Qs_settings.show()
+
+    def change_background_color(self, value):
+        if(value):
+            self.background_color_temp = value
+            self.window_style = "background-color: {0}; border: 2px solid {1};".format(self.background_color_temp, self.accent_color_temp)
+            self.label_style = "background-color: {0}; color: {1}; border: 0px".format(self.background_color_temp, self.accent_color_temp)
+            self.button_style = "background-color: {0}; color: {1}; padding: 2px; border: 1px solid {1};".format(self.background_color_temp, self.accent_color_temp)
+        else:
+            self.window_style = "background-color: {0}; border: 2px solid {1};".format(self.background_color, self.accent_color)
+            self.label_style = "background-color: {0}; color: {1}; border: 0px".format(self.background_color, self.accent_color)
+            self.button_style = "background-color: {0}; color: {1}; padding: 2px; border: 1px solid {1};".format(self.background_color, self.accent_color)
+
+        self.setStyleSheet(self.window_style)
+        self.ss_button.setStyleSheet(self.button_style)
+        self.info_label.setStyleSheet(self.label_style)
+
+    def change_accent_color(self, value):
+        if(value):
+            self.accent_color_temp = value
+            self.window_style = "background-color: {0}; border: 2px solid {1};".format(self.background_color_temp, self.accent_color_temp)
+            self.label_style = "background-color: {0}; color: {1}; border: 0px".format(self.background_color_temp, self.accent_color_temp)
+            self.button_style = "background-color: {0}; color: {1}; padding: 2px; border: 1px solid {1};".format(self.background_color_temp, self.accent_color_temp)
+        else:
+            self.window_style = "background-color: {0}; border: 2px solid {1};".format(self.background_color, self.accent_color)
+            self.label_style = "background-color: {0}; color: {1}; border: 0px".format(self.background_color, self.accent_color)
+            self.button_style = "background-color: {0}; color: {1}; padding: 2px; border: 1px solid {1};".format(self.background_color, self.accent_color)
+
+        self.setStyleSheet(self.window_style)
+        self.ss_button.setStyleSheet(self.button_style)
+        self.info_label.setStyleSheet(self.label_style)
+
+    def change_opacity(self, value):
+        if(value == -1):
+            self.setWindowOpacity(self.opacity)
+        else:
+            self.setWindowOpacity(value)
 
 
 
-    # functionality
+    # main functionality
     def take_ss(self):
         """takes ss, uses ss_handler
         if frame is visible takes a partial ss if not takes all screen
