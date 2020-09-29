@@ -168,7 +168,7 @@ class ss_handler():
 
         except Exception as e:
             print(e)
-            return False, "ss could not be saved: ss handler returned error"
+            return False, "ss could not be saved: ss handler returned error (path could have bad chars)"
 
 
         return True, ss_full_name 
