@@ -37,6 +37,6 @@ Quickshot has several customization options.
 - Multi screen support for full screen screenshots.
 
 <br/>
-<img src="readme_images/settings_example2.png" alt="drawing" width="350"/><img src="readme_images/settings_example1.png" alt="drawing" width="320"/>
+<img src="readme_images/settings_example1.png" alt="drawing" width="400"/><img src="readme_images/settings_example2.png" alt="drawing" width="450"/>
 <br/>
 
