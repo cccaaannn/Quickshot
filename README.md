@@ -29,7 +29,7 @@ Quickshot has several customization options.
 
 - Background, accent color and opacity.
 - Hotkey customization.
-- Save path. ('HOME' finds user home or any path)
+- Save path. (Any path or 'HOME' user home)
 - Several options for screenshot name.
 - Date formatting customization for screenshot name. (datetime module style)
 - Locale date naming.
