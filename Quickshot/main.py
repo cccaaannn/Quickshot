@@ -8,7 +8,7 @@ def build_application(cfg_path, tray_icon_path):
 
 
     # instantiate frame
-    frame = Qshot(cfg_path=cfg_path)
+    frame = Qshot(cfg_path=cfg_path, icon_path=tray_icon_path)
 
     # create tray menu
     menu = QMenu()
@@ -17,6 +17,9 @@ def build_application(cfg_path, tray_icon_path):
 
     hide_show_action = menu.addAction("Hide/Show")
     hide_show_action.triggered.connect(frame.hide_show)
+
+    settings = menu.addAction("Settings")
+    settings.triggered.connect(frame.show_settings)
 
     exit_action = menu.addAction("Exit")
     exit_action.triggered.connect(app.quit)
@@ -33,10 +36,10 @@ def build_application(cfg_path, tray_icon_path):
 
 
 if __name__ == '__main__':
-    build_application("Quickshot/cfg/Qshot.cfg", "Quickshot/icons/1.ico")
+    build_application("Quickshot/cfg/Qshot.cfg", "Quickshot/icons/Qs.ico")
 
     # pyinstaller
-    # build_application("cfg/Qshot.cfg", "icons/1.ico")
+    # build_application("cfg/Qshot.cfg", "Quickshot/icons/Qs.ico")
 
 
 
