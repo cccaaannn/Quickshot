@@ -1,9 +1,9 @@
 # pyqt5
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QMessageBox, QSizeGrip, QMenu            
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QMessageBox, QSizeGrip, QMenu, QSystemTrayIcon          
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import QPoint, Qt
-from PyQt5.QtGui import QFont
-from PyQt5 import QtCore
+from PyQt5.QtGui import QFont, QIcon
+from PyQt5 import QtCore, QtGui
 
 # other imports
 import json
@@ -26,6 +26,8 @@ class Qshot(QWidget):
         
         self.init_variables()
         self.init_ui()
+        self.create_context_menu()
+        self.create_tray_icon()
 
         self.init_Qshot_settings()
         self.init_global_keylistener()
@@ -109,8 +111,7 @@ class Qshot(QWidget):
         """inits ss_handler 
         ss_handler handles taking ss and saving it to given path
         """
-        self.ss_handler = ss_handler()
-        self.ss_handler.set_options(ss_extension = self.ss_extension,
+        self.ss_handler = ss_handler(ss_extension = self.ss_extension,
                             save_path = self.save_path, 
                             create_root_file = self.create_root_file, 
                             before_ss_name = self.before_ss_name, 
@@ -128,6 +129,7 @@ class Qshot(QWidget):
         self.Qs_settings.oppcity_emitter.connect(self.change_opacity)
         self.Qs_settings.background_color_emitter.connect(self.change_background_color)
         self.Qs_settings.accent_color_emitter.connect(self.change_accent_color)
+        self.Qs_settings.update_fame_emitter.connect(self.update_frame)
 
 
     # add ui elements
@@ -189,27 +191,38 @@ class Qshot(QWidget):
         self.sizegrip4 = QSizeGrip(self)
         self.sizegrip4.setVisible(True)
 
-    def contextMenuEvent(self, event):
-        self.context_menu = QMenu()
+    def create_context_menu(self):
+        """context menu for right click and tray icon"""
+        self.create_context_menu = QMenu()
 
-        take_ss_action = self.context_menu.addAction("Take ss")
-        hide_show_action = self.context_menu.addAction("Hide/Show")
-        settings = self.context_menu.addAction("Settings")
-        exit_action = self.context_menu.addAction("Exit")
+        self.take_ss_action = self.create_context_menu.addAction("Take ss")
+        self.take_ss_action.triggered.connect(self.take_ss)
 
-        action = self.context_menu.exec_(self.mapToGlobal(event.pos()))
+        self.hide_show_action = self.create_context_menu.addAction("Hide/Show")
+        self.hide_show_action.triggered.connect(self.hide_show)
 
-        if(action == take_ss_action):
-            self.take_ss()
-        elif(action == hide_show_action):
-            self.hide_show()
-        elif(action == settings):
-            self.show_settings()
-        elif(action == exit_action):
-            sys.exit()
+        self.settings = self.create_context_menu.addAction("Settings")
+        self.settings.triggered.connect(self.show_settings)
+
+        self.exit_action = self.create_context_menu.addAction("Exit")
+        self.exit_action.triggered.connect(sys.exit)
+
+    def create_tray_icon(self):
+        """creates a tray icon if available and adds context menu to it"""
+        self.create_tray_icon = QSystemTrayIcon(self)
+        if(self.create_tray_icon.isSystemTrayAvailable()):
+            self.create_tray_icon.setIcon(QIcon(self.icon_path))
+            self.create_tray_icon.setContextMenu(self.create_context_menu)
+            self.create_tray_icon.show()
+
 
 
     # event listeners
+    def contextMenuEvent(self, event):
+        """context menu functions has triggers so I don't need to use the event here, 
+        but for right click menu to work function should stay"""
+        action = self.create_context_menu.exec_(self.mapToGlobal(event.pos()))
+
     def mousePressEvent(self, event):
         self.oldPos = event.globalPos()
 
@@ -237,6 +250,7 @@ class Qshot(QWidget):
         """shows alert popup with given message"""
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
+        msg.setWindowIcon(QtGui.QIcon(self.icon_path))
         msg.setWindowTitle("Alert")
         msg.setText(alert_str)
         msg.exec()
@@ -249,14 +263,34 @@ class Qshot(QWidget):
 
     
     # settings functions
+    def update_frame(self):
+        """updates frame with new setting from config file, global keylistener has to be stop or it stays working at the background"""
+        self.set_options()
+        
+        # update ui elements
+        self.init_variables()
+        self.setStyleSheet(self.window_style)
+        self.setWindowOpacity(self.opacity)
+        self.ss_button.setStyleSheet(self.button_style)
+        self.info_label.setStyleSheet(self.label_style)
+        
+        # update global keylistener
+        self.global_keylistener_thread.stop_keylistener()
+        self.init_global_keylistener()
+
+        # update ss handler
+        self.init_ss_handler()
+
     def show_settings(self):
-        """starts or shows settings frame 
+        """starts or refreshes settings frame 
         settings frame is not starts with main frame to increase startup speed.
+        if settings not started, starts settings frame with ui elements.
+        if settings is already started, refreshes the settings ui using form cfg file since old and not saved changes stuck in the ui
         """
         if(not self.Qs_settings.is_settings_started):
             self.Qs_settings.start_settings()
         else:
-            self.Qs_settings.show()
+            self.Qs_settings.update_settings_ui()
 
     def change_background_color(self, value):
         if(value):
@@ -289,10 +323,12 @@ class Qshot(QWidget):
         self.info_label.setStyleSheet(self.label_style)
 
     def change_opacity(self, value):
+        """changes opacity or applies default if -1 is given"""
         if(value == -1):
             self.setWindowOpacity(self.opacity)
         else:
             self.setWindowOpacity(value)
+
 
 
 
@@ -319,6 +355,7 @@ class Qshot(QWidget):
         """hide show frame function for global keylistener"""
         if(self.isVisible()):
             self.hide()
+            # self.create_tray_icon.showMessage("still running", "",  1)
         else:
             self.show()
 
