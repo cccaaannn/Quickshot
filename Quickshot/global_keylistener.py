@@ -22,7 +22,13 @@ class global_keylistener(QThread):
     def emit_error_trigger(self):
         self.error_trigger.emit()
 
-    
+    def stop_keylistener(self):
+        try:
+            self.global_keylistener_thread.stop()
+            print("global listener stopped")
+        except:
+            print("global listener is already stopped")
+
     def run(self):
         try: 
             self.global_keylistener_thread = keyboard.GlobalHotKeys(self.mapped_keys)
