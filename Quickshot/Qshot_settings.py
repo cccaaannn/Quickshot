@@ -1,5 +1,5 @@
 # pyqt5
-from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QComboBox, QSlider, QCheckBox, QPushButton, QMessageBox, QGroupBox, QColorDialog, QAction           
+from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QComboBox, QSlider, QCheckBox, QPushButton, QMessageBox, QGroupBox, QColorDialog, QFileDialog, QAction
 from PyQt5.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QHBoxLayout, QGridLayout
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import pyqtSignal, Qt
@@ -77,8 +77,11 @@ class Qshot_settings(QMainWindow):
         """
         Specify hotkeys.
         Use <> on metakeys and + for adding more keys.
+        Leave it empty if you don't want.
 
-        ex: a+b+c or <ctrl>+<space>
+        ex: 
+        a+b+c
+        <ctrl>+<space>
         """,
 
         "save_path" : 
@@ -86,6 +89,7 @@ class Qshot_settings(QMainWindow):
         Save path for the screenshots.
 
         'HOME' tries to find user desktop or home automatically.
+        Leave it empty if you want the screenshot to be saved in the Quickshots directory.
         """,
 
         "root_file" : 
@@ -487,9 +491,13 @@ class Qshot_settings(QMainWindow):
         self.block3_group_box = QGroupBox("Path and naming")
 
         # Save Path
-        l1 = QLabel()
-        l1.setText("Save Path")
-        l1.setToolTip(self.tooltips["save_path"])
+        # l1 = QLabel()
+        # l1.setText("Save Path")
+        # l1.setToolTip(self.tooltips["save_path"])
+        b1 = QPushButton()
+        b1.setText("Chose save path")
+        b1.setObjectName("save_path_button")
+        b1.clicked.connect(self.on_click)
 
         self.save_path_line = QLineEdit()
         self.save_path_line.setToolTip(self.tooltips["save_path"])
@@ -561,7 +569,7 @@ class Qshot_settings(QMainWindow):
         hbox8 = QHBoxLayout()
         vbox = QVBoxLayout()
 
-        hbox1.addWidget(l1)
+        hbox1.addWidget(b1)
         hbox1.addStretch()
         hbox1.addWidget(self.save_path_line)
         
@@ -795,6 +803,12 @@ class Qshot_settings(QMainWindow):
                 self.accent_color_line.setText(color.name())
                 self.accent_color_prew.setStyleSheet("background-color: {0};".format(color.name()))
                 self.accent_color_emitter.emit(color.name())
+
+        elif(sender.objectName() == "save_path_button"):
+            """opens a folder dialog for save path location"""
+            save_path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+            if(save_path):
+                self.save_path_line.setText(save_path)
 
         elif(sender.objectName() == "reset_button"):
             """writes default values to cfg file, reads cfg file and updates ui, emits signal to main frame for updating, shows success popup (write_cfg_file has error popup so I don't need here)"""
