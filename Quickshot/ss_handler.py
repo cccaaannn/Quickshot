@@ -6,11 +6,7 @@ import os
 from PIL import Image
 
 class ss_handler():
-    def __init__(self):
-        self.set_options()
-
-
-    def set_options(self, 
+    def __init__(self,     
     ss_extension = ".png",
     save_path = "HOME", 
     create_root_file = "Qshot", 
@@ -22,7 +18,7 @@ class ss_handler():
     use_system_local_date_naming = True,
     png_compression_level = -1, 
     multi_screen = False):
-        
+
         self.ss_extension = ss_extension
 
         self.save_path = save_path
@@ -40,10 +36,11 @@ class ss_handler():
         self.png_compression_level = png_compression_level
 
         self.multi_screen = multi_screen
-
+        
         if(use_system_local_date_naming):
             locale.setlocale(locale.LC_ALL, "")
-
+        else:
+            locale.setlocale(locale.LC_ALL, "en_EN")
 
     def __create_unique_file_name(self, file_path):
         temp_file_path = file_path
