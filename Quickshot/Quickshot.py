@@ -1,9 +1,9 @@
 # pyqt5
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QMessageBox, QSizeGrip, QMenu, QSystemTrayIcon          
+from PyQt5.QtWidgets import QDesktopWidget, QWidget, QLabel, QPushButton, QMessageBox, QSizeGrip, QMenu, QSystemTrayIcon          
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QFont, QIcon
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 # other imports
 import json
@@ -201,6 +201,12 @@ class Qshot(QWidget):
         self.hide_show_action = self.create_context_menu.addAction("Hide/Show")
         self.hide_show_action.triggered.connect(self.hide_show)
 
+        self.maximize_action = self.create_context_menu.addAction("Maximize")
+        self.maximize_action.triggered.connect(self.maximize_window)
+
+        self.maximize_action = self.create_context_menu.addAction("Minimize")
+        self.maximize_action.triggered.connect(self.minimize_window)
+
         self.settings = self.create_context_menu.addAction("Settings")
         self.settings.triggered.connect(self.show_settings)
 
@@ -331,6 +337,33 @@ class Qshot(QWidget):
 
 
 
+    # utilities
+    def hide_show(self):
+        """hide show frame function for global keylistener"""
+        if(self.isVisible()):
+            self.hide()
+            # self.create_tray_icon.showMessage("still running", "",  1)
+        else:
+            self.show()
+
+    def center(self):
+        """center the frame"""
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
+    def maximize_window(self):
+        """maximizes frame"""
+        screen = QDesktopWidget().screenGeometry()
+        self.setGeometry(0, 0, screen.width(), screen.height())
+
+    def minimize_window(self):
+        """minimizes and centers the frame"""
+        self.resize(200,100)
+        self.center()
+    
+
 
     # main functionality
     def take_ss(self):
@@ -351,11 +384,3 @@ class Qshot(QWidget):
         if(not ss_state):
             self.show_alert_popup(ss_info)
     
-    def hide_show(self):
-        """hide show frame function for global keylistener"""
-        if(self.isVisible()):
-            self.hide()
-            # self.create_tray_icon.showMessage("still running", "",  1)
-        else:
-            self.show()
-
