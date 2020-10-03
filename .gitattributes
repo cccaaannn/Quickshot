@@ -1,6 +1,7 @@
 .gitattributes export-ignore
 .gitignore export-ignore
 Quickshot export-ignore
-Quickshot_ready_exe export-ignore
+Quickshot_exe_files export-ignore
 README.md export-ignore
 readme_images export-ignore
+LICENSE export-ignore
