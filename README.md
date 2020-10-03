@@ -2,7 +2,7 @@
 #### A simple, quick, customizable screenshot tool.
 ___
 
-![](https://img.shields.io/github/repo-size/cccaaannn/Quickshot?style=flat-square) [![GitHub license](https://img.shields.io/github/license/cccaaannn/imagepreprocessing?style=flat-square)](https://github.com/cccaaannn/Quickshot/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/v/release/cccaaannn/Quickshot)](https://img.shields.io/github/v/release/cccaaannn/Quickshot)
+![](https://img.shields.io/github/repo-size/cccaaannn/Quickshot?style=flat-square) [![GitHub license](https://img.shields.io/github/license/cccaaannn/imagepreprocessing?style=flat-square)](https://github.com/cccaaannn/Quickshot/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/v/release/cccaaannn/Quickshot)](https://github.com/cccaaannn/Quickshot/releases)
 
 
 ## Features
@@ -29,14 +29,15 @@ Quickshot has several customization options.
 
 - Background, accent color and opacity.
 - Hotkey customization.
-- Save path. (Any path or 'HOME' user home)
+- Save path.
 - Several options for screenshot name.
-- Date formatting customization for screenshot name. (datetime module style)
+- Date formatting customization for screenshot name.
 - Locale date naming.
-- Screenshot extension. (png or jpg) 
+- Screenshot extension.
 - Multi screen support for full screen screenshots.
+- Can copy screenshots to the clipboard.
 
 <br/>
-<img src="readme_images/settings_example1.png" alt="drawing" width="400"/><img src="readme_images/settings_example2.png" alt="drawing" width="450"/>
+<img src="readme_images/settings_example1.png" alt="drawing" width="400"/><img src="readme_images/settings_example2.png" alt="drawing" width="400"/>
 <br/>
 
