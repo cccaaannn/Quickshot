@@ -171,7 +171,13 @@ class Qshot_settings(QMainWindow):
         Multi screen full screenshot.
         If checked, full screen screenshots will include all screens, 
         if not only themain screen will be included.
+        """,
+        
+        "save_clipboard" :  
         """
+        Copies screenshot to clipboard.
+        """
+
         }
 
         self.about_text = """
@@ -201,7 +207,8 @@ class Qshot_settings(QMainWindow):
                                 "date_formatting" : "%y-%B-%d_%H-%M",
                                 "use_system_local_date_naming" : 1,
                                 "png_compression_level" : 9, 
-                                "multi_screen" : 0
+                                "multi_screen" : 0,
+                                "save_clipboard" : 1
                             }
                         }
 
@@ -225,7 +232,8 @@ class Qshot_settings(QMainWindow):
                                 "date_formatting" : "",
                                 "use_system_local_date_naming" : 0,
                                 "png_compression_level" : 9, 
-                                "multi_screen" : 0
+                                "multi_screen" : 0,
+                                "save_clipboard" : 0
                             }
                         }
 
@@ -260,6 +268,7 @@ class Qshot_settings(QMainWindow):
             self.use_system_local_date_naming = cfg["ss_options"]["use_system_local_date_naming"]
             self.png_compression_level = cfg["ss_options"]["png_compression_level"]
             self.multi_screen = cfg["ss_options"]["multi_screen"]
+            self.save_clipboard = cfg["ss_options"]["save_clipboard"]
 
             return True
         except Exception as e:
@@ -307,6 +316,11 @@ class Qshot_settings(QMainWindow):
             else:
                 self.multi_screen_checkbox.setChecked(False)
 
+            if(self.save_clipboard):
+                self.save_clipboard_checkbox.setChecked(True)
+            else:
+                self.save_clipboard_checkbox.setChecked(False)
+
         except Exception as e:
             print(e)
             self.show_alert_popup("There is a problem with cfg file please reset settings and restart Quickshot")
@@ -349,6 +363,11 @@ class Qshot_settings(QMainWindow):
             else:
                 self.new_cfg["ss_options"]["multi_screen"] = 0
 
+            if(self.save_clipboard_checkbox.isChecked()):
+                self.new_cfg["ss_options"]["save_clipboard"] = 1
+            else:
+                self.new_cfg["ss_options"]["save_clipboard"] = 0
+            
             return True
         except Exception as e:
             print(e)
@@ -643,10 +662,19 @@ class Qshot_settings(QMainWindow):
         self.multi_screen_checkbox = QCheckBox()
         self.multi_screen_checkbox.setToolTip(self.tooltips["multi_screen_full_ss"])
 
+        # save clipboard
+        l5 = QLabel()
+        l5.setText("Copy ss to clipboard")
+        l5.setToolTip(self.tooltips["save_clipboard"])
+
+        self.save_clipboard_checkbox = QCheckBox()
+        self.save_clipboard_checkbox.setToolTip(self.tooltips["save_clipboard"])
+
         hbox1 = QHBoxLayout()
         hbox2 = QHBoxLayout()
         hbox3 = QHBoxLayout()
         hbox4 = QHBoxLayout()
+        hbox5 = QHBoxLayout()
         vbox = QVBoxLayout()
 
         hbox1.addWidget(l1)
@@ -661,11 +689,15 @@ class Qshot_settings(QMainWindow):
         hbox4.addStretch()
         hbox4.addWidget(self.multi_screen_checkbox)
 
+        hbox5.addWidget(l5)
+        hbox5.addStretch()
+        hbox5.addWidget(self.save_clipboard_checkbox)
+
         vbox.addLayout(hbox1)
         vbox.addLayout(hbox2)
         vbox.addLayout(hbox3)
         vbox.addLayout(hbox4)
-
+        vbox.addLayout(hbox5)
 
         self.block4_group_box.setLayout(vbox)
 

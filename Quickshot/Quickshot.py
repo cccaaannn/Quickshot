@@ -1,9 +1,9 @@
 # pyqt5
-from PyQt5.QtWidgets import QDesktopWidget, QWidget, QLabel, QPushButton, QMessageBox, QSizeGrip, QMenu, QSystemTrayIcon          
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
-from PyQt5.QtCore import QPoint, Qt
-from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtWidgets import  QLabel, QPushButton, QMessageBox, QSizeGrip, QMenu, QSystemTrayIcon 
+from PyQt5.QtWidgets import QDesktopWidget, QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtCore import QPoint, Qt
 
 # other imports
 import json
@@ -17,7 +17,7 @@ from ss_handler import ss_handler
 
 class Qshot(QWidget):
 
-    def __init__(self, cfg_path="options.cfg", icon_path="1.ico"):
+    def __init__(self, cfg_path="Qshot.cfg", icon_path="Qshot.ico"):
         super().__init__()
 
         self.cfg_path = cfg_path
@@ -64,6 +64,7 @@ class Qshot(QWidget):
             self.use_system_local_date_naming = cfg["ss_options"]["use_system_local_date_naming"]
             self.png_compression_level = cfg["ss_options"]["png_compression_level"]
             self.multi_screen = cfg["ss_options"]["multi_screen"]
+            self.save_clipboard = cfg["ss_options"]["save_clipboard"]
 
         except Exception as e:
             print(e)
@@ -121,7 +122,9 @@ class Qshot(QWidget):
                             date_formatting = self.date_formatting,
                             use_system_local_date_naming = self.use_system_local_date_naming,
                             png_compression_level = self.png_compression_level, 
-                            multi_screen = self.multi_screen)
+                            multi_screen = self.multi_screen,
+                            save_clipboard = self.save_clipboard
+                            )
 
     def init_Qshot_settings(self):
         """intits Qshot settings and assigns local functions to emitters"""
