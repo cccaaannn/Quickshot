@@ -6,6 +6,7 @@ from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import QPoint, Qt
 
 # other imports
+import atexit
 import json
 import sys
 import os
@@ -32,7 +33,9 @@ class Qshot(QWidget):
         self.init_Qshot_settings()
         self.init_global_keylistener()
         self.init_ss_handler()
-        
+
+        atexit.register(self.exit_app)
+
 
 
     # set up frame and options
@@ -70,7 +73,7 @@ class Qshot(QWidget):
             print(e)
             self.show_alert_popup("There is a problem with cfg file")
             start_settings_with_event_loop(self.cfg_path, self.icon_path) # start settings with its own event loop
-            sys.exit()
+            self.exit_app()
 
     def init_ui(self):
         """inits ui"""
@@ -214,7 +217,7 @@ class Qshot(QWidget):
         self.settings.triggered.connect(self.show_settings)
 
         self.exit_action = self.create_context_menu.addAction("Exit")
-        self.exit_action.triggered.connect(sys.exit)
+        self.exit_action.triggered.connect(self.exit_app)
 
     def create_tray_icon(self):
         """creates a tray icon if available and adds context menu to it"""
@@ -243,7 +246,7 @@ class Qshot(QWidget):
     def keyPressEvent(self, event):
         """regular keylistener"""
         if(event.key() == Qt.Key_Escape):
-            sys.exit()
+            self.exit_app()
 
     def on_button_click(self):
         """button click listener"""
@@ -366,6 +369,14 @@ class Qshot(QWidget):
         self.resize(200,100)
         self.center()
     
+    def exit_app(self):
+        """hides tray icon before exit, also this function added to atexit to consider any other close app"""
+        try:
+            self.create_tray_icon.hide()
+            sys.exit()
+        except Exception as e:
+            print(e)
+
 
 
     # main functionality
