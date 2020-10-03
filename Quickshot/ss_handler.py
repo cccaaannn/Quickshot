@@ -1,9 +1,11 @@
 from datetime import datetime
+from io import BytesIO
+from PIL import Image
+import win32clipboard
 import mss.tools
 import locale
 import mss
 import os
-from PIL import Image
 
 class ss_handler():
     def __init__(self,     
@@ -17,7 +19,9 @@ class ss_handler():
     date_formatting = "%y-%m-%d_%H-%M", 
     use_system_local_date_naming = True,
     png_compression_level = -1, 
-    multi_screen = False):
+    multi_screen = False,
+    save_clipboard = True
+    ):
 
         self.ss_extension = ss_extension
 
@@ -37,10 +41,13 @@ class ss_handler():
 
         self.multi_screen = multi_screen
         
+        self.save_clipboard = save_clipboard
+
         if(use_system_local_date_naming):
             locale.setlocale(locale.LC_ALL, "")
         else:
             locale.setlocale(locale.LC_ALL, "en_EN")
+
 
     def __create_unique_file_name(self, file_path):
         temp_file_path = file_path
@@ -106,6 +113,21 @@ class ss_handler():
         return save_path, "Path constructed successfully"
 
 
+    def __copy_image_to_clipboard(self, image_path):
+        """saves image to win32 clipboard"""
+        
+        image = Image.open(image_path)
+        output = BytesIO()
+        image.convert("RGB").save(output, "BMP")
+        data = output.getvalue()[14:]
+        output.close()
+
+        win32clipboard.OpenClipboard()
+        win32clipboard.EmptyClipboard()
+        win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
+        win32clipboard.CloseClipboard()
+
+
     def to_jpg(self, raw_pixels, output = None):
         """Converts raw pixels to jpg
         pil usage example from mss documentation"""
@@ -120,6 +142,7 @@ class ss_handler():
             temp_image.save(output)
         else:
             return temp_image
+
 
 
     def take_ss(self, ss_bbox = None):
@@ -162,7 +185,14 @@ class ss_handler():
                 else:
                     return False, "ss could not be saved: extension type is not supported"
 
-
+            # clipboard stuff
+            if(self.save_clipboard):
+                try:
+                    self.__copy_image_to_clipboard(ss_full_name)
+                except Exception as e:
+                    print(e)
+                    return False, "clipboard error: ss saved but clipboard returned error (try without this setting)"
+                
         except Exception as e:
             print(e)
             return False, "ss could not be saved: ss handler returned error (path could have bad chars)"
