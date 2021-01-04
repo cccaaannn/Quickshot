@@ -15,13 +15,13 @@ ___
 
 ## Custom color Quickshot examples
 
-<img src="readme_images/example1.png" alt="drawing" width="250"/><img src="readme_images/example2.png" alt="drawing" width="250"/>
+<img src="other/readme_images/example1.png" alt="drawing" width="250"/><img src="other/readme_images/example2.png" alt="drawing" width="250"/>
 <br/>
-<img src="readme_images/example3.png" alt="drawing" width="250"/><img src="readme_images/example4.png" alt="drawing" width="250"/>
+<img src="other/readme_images/example3.png" alt="drawing" width="250"/><img src="other/readme_images/example4.png" alt="drawing" width="250"/>
 <br/>
-<img src="readme_images/example5.png" alt="drawing" width="250"/><img src="readme_images/example6.png" alt="drawing" width="250"/>
+<img src="other/readme_images/example5.png" alt="drawing" width="250"/><img src="other/readme_images/example6.png" alt="drawing" width="250"/>
 <br/>
-<img src="readme_images/example7.png" alt="drawing" width="250"/><img src="readme_images/example8.png" alt="drawing" width="250"/>
+<img src="other/readme_images/example7.png" alt="drawing" width="250"/><img src="other/readme_images/example8.png" alt="drawing" width="250"/>
 <br/>
 
 ## Settings
@@ -38,6 +38,6 @@ Quickshot has several customization options.
 - Can copy screenshots to the clipboard.
 
 <br/>
-<img src="readme_images/settings_example1.png" alt="drawing" width="400"/><img src="readme_images/settings_example2.png" alt="drawing" width="400"/>
+<img src="other/readme_images/settings_example1.png" alt="drawing" width="400"/><img src="other/readme_images/settings_example2.png" alt="drawing" width="400"/>
 <br/>
 
