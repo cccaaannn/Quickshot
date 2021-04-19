@@ -2,7 +2,7 @@
 #### A simple, quick, customizable screenshot tool.
 ___
 
-![](https://img.shields.io/github/repo-size/cccaaannn/Quickshot?style=flat-square) [![GitHub license](https://img.shields.io/github/license/cccaaannn/imagepreprocessing?style=flat-square)](https://github.com/cccaaannn/Quickshot/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/v/release/cccaaannn/Quickshot)](https://github.com/cccaaannn/Quickshot/releases)
+![GitHub top language](https://img.shields.io/github/languages/top/cccaaannn/Quickshot?style=flat-square) ![](https://img.shields.io/github/repo-size/cccaaannn/Quickshot?style=flat-square) [![GitHub license](https://img.shields.io/github/license/cccaaannn/Quickshot?style=flat-square)](https://github.com/cccaaannn/Quickshot/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/v/release/cccaaannn/Quickshot)](https://github.com/cccaaannn/Quickshot/releases)
 
 
 ## Features
@@ -27,15 +27,16 @@ ___
 ## Settings
 Quickshot has several customization options.
 
-- Background, accent color and opacity.
+- Background, accent color and opacity customization.
 - Hotkey customization.
-- Save path.
-- Several options for screenshot name.
-- Date formatting customization for screenshot name.
-- Locale date naming.
-- Screenshot extension.
 - Multi screen support for full screen screenshots.
-- Can copy screenshots to the clipboard.
+- Clipboard support for screenshots.
+- Screenshot options.
+    - Save name and path options.
+    - Options for screenshot numbers.
+    - Date formatting customization.
+    - Locale date naming.
+    - jpg or png extension support.
 
 <br/>
 <img src="other/readme_images/settings_example1.png" alt="drawing" width="400"/><img src="other/readme_images/settings_example2.png" alt="drawing" width="400"/>
