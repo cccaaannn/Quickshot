@@ -1,5 +1,5 @@
 # pyqt5
-from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QComboBox, QSlider, QCheckBox, QPushButton, QMessageBox, QGroupBox, QColorDialog, QFileDialog, QAction
+from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QComboBox, QSpinBox, QSlider, QCheckBox, QPushButton, QMessageBox, QGroupBox, QColorDialog, QFileDialog, QAction
 from PyQt5.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QHBoxLayout, QGridLayout
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import pyqtSignal, Qt
@@ -16,7 +16,8 @@ class Qshot_settings(QMainWindow):
     oppcity_emitter = pyqtSignal(float)
     background_color_emitter = pyqtSignal(str)
     accent_color_emitter = pyqtSignal(str)
-    update_fame_emitter = pyqtSignal()
+    update_frame_emitter = pyqtSignal()
+    hide_frame_emitter = pyqtSignal(bool)
 
     def __init__(self, cfg_path, icon_path):
         super().__init__()
@@ -61,7 +62,7 @@ class Qshot_settings(QMainWindow):
 
         self.setup_ui()
         self.show()
-        
+
     def init_variables(self):
         """inits class variables"""
         self.ss_extensions_list = [".png", ".jpg"]
@@ -70,121 +71,121 @@ class Qshot_settings(QMainWindow):
         self.tooltips = {
         "colors_and_opacity" :
         """
-        Color and opacity settings.
+Color and opacity settings.
         """,
 
         "hotkeys" : 
         """
-        Specify hotkeys.
-        Use <> on metakeys and + for adding more keys.
-        Leave it empty if you don't want.
+Specify hotkeys.
+Use <> on metakeys and + for adding more keys.
+Leave it empty if you don't want.
 
-        ex: 
-        a+b+c
-        <ctrl>+<space>
+ex: 
+a+b+c
+<ctrl>+<space>
         """,
 
         "save_path" : 
         """
-        Save path for the screenshots.
+Save path for the screenshots.
 
-        'HOME' tries to find user desktop or home automatically.
-        Leave it empty if you want the screenshot to be saved in the Quickshots directory.
+'HOME' tries to find user desktop or home automatically.
+Leave it empty if you want the screenshot to be saved in the Quickshots directory.
         """,
 
         "root_file" : 
         """
-        Root filename for screenshots.
-        Specify a filename for screenshots to be saved, 
-        it will be created under the save path you specified.
-        Leave it empty if you don't want.
+Root filename for screenshots.
+Specify a filename for screenshots to be saved, 
+it will be created under the save path you specified.
+Leave it empty if you don't want.
         """,
 
         "text_before_ss-text_after_ss" : 
         """
-        Text before and after the screenshot name.
-        Specify a text for placing before and after screenshot name.
-        Leave it empty if you don't want.
+Text before and after the screenshot name.
+Specify a text for placing before and after screenshot name.
+Leave it empty if you don't want.
 
-        ex: 
-        (20_01_01).png  
-        screen_shot_20_01_01_end_of_ss.png
+ex: 
+(20_01_01).png  
+screen_shot_20_01_01_end_of_ss.png
         """,
         
         "text_before_ss_number-text_after_ss_number" : 
         """
-        Text before and after screenshot number.
-        If multiple screenshots exists with the same name new one will be numbered, 
-        you can specify what text will be before and after that number.
-        Leave it empty if you don't want.
+Text before and after screenshot number.
+If multiple screenshots exists with the same name new one will be numbered, 
+you can specify what text will be before and after that number.
+Leave it empty if you don't want.
 
-        ex: 
-        qs_20_01_01(1).png  
-        qs_20_01_01[1].png  
-        qs_20_01_01-1.png         
+ex: 
+qs_20_01_01(1).png  
+qs_20_01_01[1].png  
+qs_20_01_01-1.png         
         """,
 
         "date_formatting" : 
         """
-        Date formatting keywords
+Date formatting keywords
 
-        %Y year full
-        %y year 2 digit
-        
-        %m month digit
-        %B month text
+%Y year full
+%y year 2 digit
 
-        %d day
-        %A weekday long
-        %a weekday short
+%m month digit
+%B month text
 
-        %H hour 24
-        %I hour 12
-        %p am/pm
-        %M minute
-        %S second
+%d day
+%A weekday long
+%a weekday short
 
-        ex: 
-        %Y-%m-%d_%H-%M 2020-01-01_01-00.png
-        %y-%B-%d-%A 20-January-01-Mon.png
+%H hour 24
+%I hour 12
+%p am/pm
+%M minute
+%S second
+
+ex: 
+%Y-%m-%d_%H-%M 
+2020-01-01_01-00.png
+
+%y-%B-%d-%A 
+20-January-01-Mon.png
         """,
 
         "Use_local_date_naming" : 
         """
-        Use local date naming.
-        Check if you want date names to be your systems language.
+Check if you want date names to be your systems language.
         """,
 
         "extension" : 
         """
-        Extension of the screenshots.
+Extension of the screenshots.
         """,
 
         "png_compression_level" :
         """
-        Png compresion level.
-        Higher the level is smaller the png images will be.
+Higher the level is smaller the png images will be.
         """,
 
-        "multi_screen_full_ss" :
+        "default_screen" :
         """
-        Multi screen full screenshot.
-        If checked, full screen screenshots will include all screens, 
-        if not only themain screen will be included.
+When Quickshot is hidden it takes fullscreen screenshots, select default screen for full screen screenshots.
+If 'All' box is checked Quickshot takes screenshot from all screens and combines them.
         """,
         
         "save_clipboard" :  
         """
-        Copies screenshot to clipboard.
+Copies screenshot to clipboard.
         """
 
         }
 
         self.about_text = """
-        A simple, quick, customizable screenshot tool.
-        
-        <br/><br/>
-        <a href='https://github.com/cccaaannn/Quickshot'>Quickshot github</a>
+Quickshot is a simple, quick, customizable screenshot tool.
+
+<br/><br/>
+It is an open-sourced application you can check the <a href='https://github.com/cccaaannn/Quickshot'>Quickshot github</a> page.
         """
         
         self.default_cfg = {
@@ -195,7 +196,6 @@ class Qshot_settings(QMainWindow):
                                 "ss_hotkey" : "<alt>+s",
                                 "hide_hotkey" : "<alt>+h"
                             },
-                        
                             "ss_options":{
                                 "ss_extension" : ".png",
                                 "save_path" : "HOME", 
@@ -207,7 +207,7 @@ class Qshot_settings(QMainWindow):
                                 "date_formatting" : "%y-%B-%d_%H-%M",
                                 "use_system_local_date_naming" : 1,
                                 "png_compression_level" : 9, 
-                                "multi_screen" : 0,
+                                "default_screen" : 1,
                                 "save_clipboard" : 1
                             }
                         }
@@ -232,7 +232,7 @@ class Qshot_settings(QMainWindow):
                                 "date_formatting" : "",
                                 "use_system_local_date_naming" : 0,
                                 "png_compression_level" : 9, 
-                                "multi_screen" : 0,
+                                "default_screen" : 1,
                                 "save_clipboard" : 0
                             }
                         }
@@ -267,7 +267,7 @@ class Qshot_settings(QMainWindow):
             self.date_formatting = cfg["ss_options"]["date_formatting"]
             self.use_system_local_date_naming = cfg["ss_options"]["use_system_local_date_naming"]
             self.png_compression_level = cfg["ss_options"]["png_compression_level"]
-            self.multi_screen = cfg["ss_options"]["multi_screen"]
+            self.default_screen = cfg["ss_options"]["default_screen"]
             self.save_clipboard = cfg["ss_options"]["save_clipboard"]
 
             return True
@@ -311,10 +311,14 @@ class Qshot_settings(QMainWindow):
             compression_level_index = self.png_compression_combobox.findText(str(self.png_compression_level), QtCore.Qt.MatchFixedString)
             self.png_compression_combobox.setCurrentIndex(compression_level_index)
 
-            if(self.multi_screen):
-                self.multi_screen_checkbox.setChecked(True)
+            # if all_screens_checkbox is checked disable the default_screen_selector
+            if(self.default_screen == 0):
+                self.all_screens_checkbox.setChecked(True)
+                self.default_screen_selector.setDisabled(True)
             else:
-                self.multi_screen_checkbox.setChecked(False)
+                self.all_screens_checkbox.setChecked(False)
+                self.default_screen_selector.setDisabled(False)
+                self.default_screen_selector.setValue(self.default_screen)
 
             if(self.save_clipboard):
                 self.save_clipboard_checkbox.setChecked(True)
@@ -358,10 +362,10 @@ class Qshot_settings(QMainWindow):
 
             self.new_cfg["ss_options"]["png_compression_level"] = int(self.png_compression_combobox.currentText())
 
-            if(self.multi_screen_checkbox.isChecked()):
-                self.new_cfg["ss_options"]["multi_screen"] = 1
+            if(self.all_screens_checkbox.isChecked()):
+                self.new_cfg["ss_options"]["default_screen"] = 0
             else:
-                self.new_cfg["ss_options"]["multi_screen"] = 0
+                self.new_cfg["ss_options"]["default_screen"] = self.default_screen_selector.value()
 
             if(self.save_clipboard_checkbox.isChecked()):
                 self.new_cfg["ss_options"]["save_clipboard"] = 1
@@ -654,18 +658,28 @@ class Qshot_settings(QMainWindow):
         self.png_compression_combobox.addItems(self.png_compression_level_list)
         self.png_compression_combobox.setToolTip(self.tooltips["png_compression_level"])
 
-        # Multi screen full ss
+        # Default screen
         l4 = QLabel()
-        l4.setText("Multi screen full ss")
-        l4.setToolTip(self.tooltips["multi_screen_full_ss"])
+        l4.setText("Default screen")
+        l4.setToolTip(self.tooltips["default_screen"])
 
-        self.multi_screen_checkbox = QCheckBox()
-        self.multi_screen_checkbox.setToolTip(self.tooltips["multi_screen_full_ss"])
+        l5 = QLabel()
+        l5.setText("All")
+        l5.setToolTip(self.tooltips["default_screen"])
+
+        self.all_screens_checkbox = QCheckBox()
+        self.all_screens_checkbox.setObjectName("all_screens_checkbox")
+        self.all_screens_checkbox.clicked.connect(self.on_click)
+        self.all_screens_checkbox.setToolTip(self.tooltips["default_screen"])
+
+        self.default_screen_selector = QSpinBox()
+        self.default_screen_selector.setMinimum(1)
+        self.default_screen_selector.setToolTip(self.tooltips["default_screen"])
 
         # save clipboard
-        l5 = QLabel()
-        l5.setText("Copy ss to clipboard")
-        l5.setToolTip(self.tooltips["save_clipboard"])
+        l6 = QLabel()
+        l6.setText("Copy ss to clipboard")
+        l6.setToolTip(self.tooltips["save_clipboard"])
 
         self.save_clipboard_checkbox = QCheckBox()
         self.save_clipboard_checkbox.setToolTip(self.tooltips["save_clipboard"])
@@ -687,9 +701,11 @@ class Qshot_settings(QMainWindow):
 
         hbox4.addWidget(l4)
         hbox4.addStretch()
-        hbox4.addWidget(self.multi_screen_checkbox)
+        hbox4.addWidget(l5)
+        hbox4.addWidget(self.all_screens_checkbox)
+        hbox4.addWidget(self.default_screen_selector)
 
-        hbox5.addWidget(l5)
+        hbox5.addWidget(l6)
         hbox5.addStretch()
         hbox5.addWidget(self.save_clipboard_checkbox)
 
@@ -705,7 +721,7 @@ class Qshot_settings(QMainWindow):
         self.bottom_layout = QHBoxLayout()
 
         l1 = QLabel()
-        l1.setText("Hover over sections for tooltips")
+        l1.setText("Hover over sections for tips")
         l1.setFont(QFont('Arial', 8, weight=QtGui.QFont.Bold))
 
         b1 = QPushButton()
@@ -758,24 +774,29 @@ class Qshot_settings(QMainWindow):
     # popups
     def show_alert_popup(self, alert_str):
         """shows alert popup with given message"""
+        self.hide_frame_emitter.emit(True) # hide the ss frame when showing popup
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
         msg.setWindowIcon(QtGui.QIcon(self.icon_path))
         msg.setWindowTitle("Alert")
         msg.setText(alert_str)
         msg.exec()
+        self.hide_frame_emitter.emit(False)  
 
     def show_success_popup(self, success_str):
         """shows success popup with given message"""
+        self.hide_frame_emitter.emit(True) # hide the ss frame when showing popup
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setWindowIcon(QtGui.QIcon(self.icon_path))
         msg.setWindowTitle("Success")
         msg.setText(success_str)
         msg.exec()
+        self.hide_frame_emitter.emit(False)        
 
     def show_about_popup(self):
         """shows about popup"""
+        self.hide_frame_emitter.emit(True) # hide the ss frame when showing popup
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setWindowIcon(QtGui.QIcon(self.icon_path))
@@ -783,6 +804,7 @@ class Qshot_settings(QMainWindow):
         msg.setTextFormat(Qt.RichText)
         msg.setText(self.about_text)
         msg.exec()
+        self.hide_frame_emitter.emit(False)  
 
 
 
@@ -797,8 +819,8 @@ class Qshot_settings(QMainWindow):
 
     def revert_preview(self):
         """reverts to default values"""
-        self.background_color_emitter.emit("")
-        self.accent_color_emitter.emit("")
+        self.background_color_emitter.emit(None)
+        self.accent_color_emitter.emit(None)
         self.oppcity_emitter.emit(-1)
 
         # self.setWindowOpacity(1)
@@ -822,7 +844,9 @@ class Qshot_settings(QMainWindow):
         # buttons
         if(sender.objectName() == "background_color_button"):
             """writes background color code to lineedit, shows color on color label, emits color change signal to main frame"""
+            self.hide_frame_emitter.emit(True) # hide the ss frame when opening color picker
             color = QColorDialog.getColor()
+            self.hide_frame_emitter.emit(False)
             if(color.isValid()):
                 self.background_color_line.setText(color.name())
                 self.background_color_prew.setStyleSheet("background-color: {0};".format(color.name()))
@@ -830,7 +854,9 @@ class Qshot_settings(QMainWindow):
             
         elif(sender.objectName() == "accent_color_button"):
             """writes accent color code to lineedit, shows color on color label, emits color change signal to main frame"""
+            self.hide_frame_emitter.emit(True) # hide the ss frame when opening color picker
             color = QColorDialog.getColor()
+            self.hide_frame_emitter.emit(False)
             if(color.isValid()):
                 self.accent_color_line.setText(color.name())
                 self.accent_color_prew.setStyleSheet("background-color: {0};".format(color.name()))
@@ -848,7 +874,7 @@ class Qshot_settings(QMainWindow):
             if(write_status):
                 self.read_cfg_file()
                 self.variable_to_ui()
-                self.update_fame_emitter.emit()
+                self.update_frame_emitter.emit()
                 self.show_success_popup("Settings reset to default")
 
         elif(sender.objectName() == "save_changes_button" or sender.objectName() == "save" ):
@@ -857,7 +883,7 @@ class Qshot_settings(QMainWindow):
             if(variable_status):
                 write_status = self.write_cfg_file(self.new_cfg)
                 if(write_status):
-                    self.update_fame_emitter.emit()
+                    self.update_frame_emitter.emit()
                     self.show_success_popup("Settings saved")
 
         # menu items
@@ -865,6 +891,14 @@ class Qshot_settings(QMainWindow):
             self.close()
         elif(sender.objectName() == "about"):
             self.show_about_popup()
+
+        # checkboxes
+        elif(sender.objectName() == "all_screens_checkbox"):
+            # if all_screens_checkbox is checked disable the default_screen_selector
+            if(self.all_screens_checkbox.isChecked()):
+                self.default_screen_selector.setDisabled(True)
+            else:
+                self.default_screen_selector.setDisabled(False)
 
 
 
