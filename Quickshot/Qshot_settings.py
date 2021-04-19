@@ -638,7 +638,7 @@ It is an open-sourced application you can check the <a href='https://github.com/
         self.block3_group_box.setLayout(vbox)
 
     def block4(self):
-        self.block4_group_box = QGroupBox("Screeshot options")
+        self.block4_group_box = QGroupBox("Screenshot options")
         
         # extension
         l1 = QLabel()
