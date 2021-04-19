@@ -7,8 +7,11 @@ def build_application(cfg_path, icon_path):
     frame = Qshot(cfg_path=cfg_path, icon_path=icon_path)
     sys.exit(app.exec())
 
+is_dev = True
 if __name__ == '__main__':
-    build_application("Quickshot/cfg/Qshot.cfg", "Quickshot/icons/Qs.ico")
-
-    # pyinstaller
-    # build_application("cfg/Qshot.cfg", "icons/Qs.ico")
+    if(is_dev):
+        # dev
+        build_application("Quickshot/cfg/Qshot.cfg", "Quickshot/icons/Qs.ico")
+    else:
+        # compile
+        build_application("cfg/Qshot.cfg", "icons/Qs.ico") 
