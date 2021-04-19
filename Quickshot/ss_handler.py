@@ -19,7 +19,7 @@ class ss_handler():
     date_formatting = "%y-%m-%d_%H-%M", 
     use_system_local_date_naming = True,
     png_compression_level = -1, 
-    multi_screen = False,
+    default_screen = 1,  # 0 for multi screen combined
     save_clipboard = True
     ):
 
@@ -39,7 +39,7 @@ class ss_handler():
 
         self.png_compression_level = png_compression_level
 
-        self.multi_screen = multi_screen
+        self.default_screen = default_screen
         
         self.save_clipboard = save_clipboard
 
@@ -171,10 +171,11 @@ class ss_handler():
 
                 if(ss_bbox):
                     sct_img = sct.grab(ss_bbox)
-                elif(self.multi_screen):
-                    sct_img = sct.grab(sct.monitors[0])
                 else:
-                    sct_img = sct.grab(sct.monitors[1])
+                    if(self.default_screen >= len(sct.monitors)):
+                        return False, "ss could not be saved: no such screen '{0}'".format(self.default_screen)
+                    else:
+                        sct_img = sct.grab(sct.monitors[self.default_screen])
 
                 # convert and save
                 if(self.ss_extension == ".png"):
@@ -183,7 +184,7 @@ class ss_handler():
                 elif(self.ss_extension == ".jpg"):
                     self.to_jpg(sct_img, output = ss_full_name)
                 else:
-                    return False, "ss could not be saved: extension type is not supported"
+                    return False, "ss could not be saved: extension type is not supported '{0}'".format(self.ss_extension)
 
             # clipboard stuff
             if(self.save_clipboard):
@@ -191,11 +192,11 @@ class ss_handler():
                     self.__copy_image_to_clipboard(ss_full_name)
                 except Exception as e:
                     print(e)
-                    return False, "clipboard error: ss saved but clipboard returned error (try without this setting)"
+                    return False, "clipboard error: ss saved but clipboard returned error (try without this setting enabled)"
                 
         except Exception as e:
             print(e)
-            return False, "ss could not be saved: ss handler returned error (path could have bad chars)"
+            return False, "ss could not be saved: ss handler returned error (cfg file could be broken)"
 
 
         return True, ss_full_name 
