@@ -11,7 +11,7 @@ import json
 import sys
 import os
 
-# my classes
+# Quickshot classes
 from Qshot_settings import Qshot_settings, start_settings_with_event_loop
 from global_keylistener import global_keylistener
 from ss_handler import ss_handler
@@ -66,7 +66,7 @@ class Qshot(QWidget):
             self.date_formatting = cfg["ss_options"]["date_formatting"]
             self.use_system_local_date_naming = cfg["ss_options"]["use_system_local_date_naming"]
             self.png_compression_level = cfg["ss_options"]["png_compression_level"]
-            self.multi_screen = cfg["ss_options"]["multi_screen"]
+            self.default_screen = cfg["ss_options"]["default_screen"]
             self.save_clipboard = cfg["ss_options"]["save_clipboard"]
 
         except Exception as e:
@@ -91,6 +91,8 @@ class Qshot(QWidget):
         self.setup_ui()
         self.show()
 
+        self.resize(self.size()) # new pyqt5 version (15.4) can't show back hidden frames properly if this line is not called at least once
+
     def init_variables(self):
         """init variables"""
         self.window_style = "background-color: {0}; border: 2px solid {1};".format(self.background_color, self.accent_color)
@@ -99,6 +101,12 @@ class Qshot(QWidget):
 
         self.background_color_temp = self.background_color
         self.accent_color_temp = self.accent_color
+
+        # keeps old pointer position
+        self.old_pos = None
+
+        # keeps previous size for hidding and showing frame
+        self.previous_size = self.size()
 
 
     def init_global_keylistener(self):
@@ -125,7 +133,7 @@ class Qshot(QWidget):
                             date_formatting = self.date_formatting,
                             use_system_local_date_naming = self.use_system_local_date_naming,
                             png_compression_level = self.png_compression_level, 
-                            multi_screen = self.multi_screen,
+                            default_screen = self.default_screen,
                             save_clipboard = self.save_clipboard
                             )
 
@@ -135,7 +143,8 @@ class Qshot(QWidget):
         self.Qs_settings.oppcity_emitter.connect(self.change_opacity)
         self.Qs_settings.background_color_emitter.connect(self.change_background_color)
         self.Qs_settings.accent_color_emitter.connect(self.change_accent_color)
-        self.Qs_settings.update_fame_emitter.connect(self.update_frame)
+        self.Qs_settings.update_frame_emitter.connect(self.update_frame)
+        self.Qs_settings.hide_frame_emitter.connect(self.hide_by_value)
 
 
     # add ui elements
@@ -236,12 +245,19 @@ class Qshot(QWidget):
         action = self.create_context_menu.exec_(self.mapToGlobal(event.pos()))
 
     def mousePressEvent(self, event):
-        self.oldPos = event.globalPos()
+        """keeps old position on first press"""
+        self.old_pos = event.globalPos()
+
+    def mouseReleaseEvent(self, event):
+        """resets old position on mouse relese to prevent moving on resize"""
+        self.old_pos = None
 
     def mouseMoveEvent(self, event):
-        delta = QPoint(event.globalPos() - self.oldPos)
-        self.move(self.x() + delta.x(), self.y() + delta.y())
-        self.oldPos = event.globalPos()
+        """if old_pos exists moves the frame"""
+        if(self.old_pos):
+            delta = QPoint(event.globalPos() - self.old_pos)
+            self.move(self.x() + delta.x(), self.y() + delta.y())
+            self.old_pos = event.globalPos()
 
     def keyPressEvent(self, event):
         """regular keylistener"""
@@ -311,6 +327,7 @@ class Qshot(QWidget):
             self.label_style = "background-color: {0}; color: {1}; border: 0px".format(self.background_color_temp, self.accent_color_temp)
             self.button_style = "background-color: {0}; color: {1}; padding: 2px; border: 1px solid {1};".format(self.background_color_temp, self.accent_color_temp)
         else:
+            self.background_color_temp = self.background_color # reset temp color on reverting settings
             self.window_style = "background-color: {0}; border: 2px solid {1};".format(self.background_color, self.accent_color)
             self.label_style = "background-color: {0}; color: {1}; border: 0px".format(self.background_color, self.accent_color)
             self.button_style = "background-color: {0}; color: {1}; padding: 2px; border: 1px solid {1};".format(self.background_color, self.accent_color)
@@ -326,6 +343,7 @@ class Qshot(QWidget):
             self.label_style = "background-color: {0}; color: {1}; border: 0px".format(self.background_color_temp, self.accent_color_temp)
             self.button_style = "background-color: {0}; color: {1}; padding: 2px; border: 1px solid {1};".format(self.background_color_temp, self.accent_color_temp)
         else:
+            self.accent_color_temp = self.accent_color # reset temp color on reverting settings
             self.window_style = "background-color: {0}; border: 2px solid {1};".format(self.background_color, self.accent_color)
             self.label_style = "background-color: {0}; color: {1}; border: 0px".format(self.background_color, self.accent_color)
             self.button_style = "background-color: {0}; color: {1}; padding: 2px; border: 1px solid {1};".format(self.background_color, self.accent_color)
@@ -349,6 +367,14 @@ class Qshot(QWidget):
         if(self.isVisible()):
             self.hide()
             # self.create_tray_icon.showMessage("still running", "",  1)
+        else:
+            self.show()
+
+    def hide_by_value(self, is_hide):
+        """hide show frame function for displaying settings pop ups"""
+        if(is_hide):
+            self.hide()
+
         else:
             self.show()
 
@@ -388,9 +414,15 @@ class Qshot(QWidget):
             bbox = self.geometry().getRect()
             bbox = {"top": bbox[1], "left" : bbox[0], "width" : bbox[2], "height" : bbox[3]}
             
+            # hide and save the previous size
             self.hide()
+            size = self.size()
             ss_state, ss_info = self.ss_handler.take_ss(ss_bbox=bbox)
+
+            # show and resize it back
             self.show()
+            # self.resize(self.size())
+ 
         else:
             ss_state, ss_info = self.ss_handler.take_ss()
 
