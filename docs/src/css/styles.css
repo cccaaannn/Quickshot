@@ -1,0 +1,57 @@
+/* ---------- html elements ---------- */
+
+body {
+    background-color: #1f1f1f;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+    color: #568bff;
+}
+
+h3 {
+    color: #568bff;
+}
+
+a {
+    color: #568bff;
+    text-decoration: none;
+}
+
+button {
+    color: #ffffff;    
+    background-color: #1f1f1f;
+    border: 2px solid #ffffff;    
+    text-decoration: none;
+    padding: 0.5em;
+    margin-right: 1em;
+    border-radius: 7px;
+}
+
+button:hover {
+    color: #568bff;    
+    border: 2px solid #568bff;
+    box-shadow:  0 0 10px #568bff;
+}
+
+button:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* ---------- ---------- ---------- */
+
+
+/* ---------- layout ---------- */
+
+.container {
+    display: grid;
+    place-items: center;
+}
+
+.content {
+    width: 55%;
+}
+
+/* ---------- ---------- ---------- */
