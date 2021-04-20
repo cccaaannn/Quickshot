@@ -2,9 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Quickshot"
-#define MyAppVersion "2.5"
+#define MyAppVersion "2.6"
 #define MyAppPublisher "Can Kurt"
-#define MyAppURL "https://github.com/cccaaannn/Quickshot"
+#define MyAppURL "https://cccaaannn.github.io/Quickshot/index.html"
 #define MyAppExeName "Quickshot.exe"
 
 [Setup]

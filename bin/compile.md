@@ -9,7 +9,7 @@
 
 ## Known lib version problems
 - `pynput==1.7.3` causes import error when compiled. <a href="https://stackoverflow.com/questions/63681770/getting-error-when-using-pynput-with-pyinstaller">stackoverflow</a>
-- `pyqt5==5.15.4` causes some resizing problems but it is mostly fixed, if problems remains use pyqt5==5.14.0
+- `pyqt5>=5.15.0` causes some resizing problems, use `pyqt5==5.14.2`
 
 ## Compile with
 From scratch
