@@ -4,7 +4,7 @@ ___
 
 ![GitHub top language](https://img.shields.io/github/languages/top/cccaaannn/Quickshot?style=flat-square) ![](https://img.shields.io/github/repo-size/cccaaannn/Quickshot?style=flat-square) [![GitHub license](https://img.shields.io/github/license/cccaaannn/Quickshot?style=flat-square)](https://github.com/cccaaannn/Quickshot/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/v/release/cccaaannn/Quickshot?style=flat-square)](https://github.com/cccaaannn/Quickshot/releases?style=flat-square)
 
-## Check out [Quickshot website](https://cccaaannn.github.io/Quickshot/index.html)
+## Check out [Quickshot website](https://cccaaannn.github.io/Quickshot)
 
 ## Features
 - **Fast**, no more choosing save path or name every time.
