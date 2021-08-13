@@ -7,7 +7,8 @@ from PyQt5.QtCore import QPoint, Qt
 
 # other imports
 import atexit
-import json
+import yaml
+import time
 import sys
 import os
 
@@ -18,9 +19,8 @@ from ss_handler import ss_handler
 
 class Qshot(QWidget):
 
-    def __init__(self, cfg_path="Qshot.cfg", icon_path="Qshot.ico"):
+    def __init__(self, cfg_path, icon_path):
         super().__init__()
-
         self.cfg_path = cfg_path
         self.icon_path = icon_path
         self.set_options()
@@ -46,28 +46,38 @@ class Qshot(QWidget):
         try:
             # read cfg file
             with open(self.cfg_path,"r") as file:
-                cfg = json.load(file)
+                cfg = yaml.safe_load(file)
 
-            # general
-            self.opacity = cfg["general"]["opacity"]
-            self.background_color = cfg["general"]["background_color"]
-            self.accent_color = cfg["general"]["accent_color"]
-            self.ss_hotkey = cfg["general"]["ss_hotkey"]
-            self.hide_hotkey = cfg["general"]["hide_hotkey"]
+            # quickshot_frame
+            # theme
+            self.background_color = cfg["quickshot_frame"]["theme"]["background_color"]
+            self.accent_color = cfg["quickshot_frame"]["theme"]["accent_color"]
+            self.opacity = cfg["quickshot_frame"]["theme"]["opacity"]
+
+            # hotkeys
+            self.ss_hotkey = cfg["quickshot_frame"]["hotkeys"]["ss_hotkey"]
+            self.hide_hotkey = cfg["quickshot_frame"]["hotkeys"]["hide_hotkey"]
+
+            # utilities
+            self.frame_delay = cfg["quickshot_frame"]["utilities"]["frame_delay"]
+
+
+            # ss ss_handler
+            # naming
+            self.save_path = os.path.normpath(cfg["ss_handler"]["naming"]["save_path"]) # convert to path
+            self.create_root_file = cfg["ss_handler"]["naming"]["create_root_file"]
+            self.before_ss_name = cfg["ss_handler"]["naming"]["before_ss_name"]
+            self.after_ss_name = cfg["ss_handler"]["naming"]["after_ss_name"]
+            self.before_number = cfg["ss_handler"]["naming"]["before_number"]
+            self.after_number = cfg["ss_handler"]["naming"]["after_number"]
+            self.date_formatting = cfg["ss_handler"]["naming"]["date_formatting"]
+            self.use_system_local_date_naming = cfg["ss_handler"]["naming"]["use_system_local_date_naming"]
 
             # ss options
-            self.ss_extension = cfg["ss_options"]["ss_extension"]
-            self.save_path = os.path.normpath(cfg["ss_options"]["save_path"]) # convert to path
-            self.create_root_file = cfg["ss_options"]["create_root_file"]
-            self.before_ss_name = cfg["ss_options"]["before_ss_name"]
-            self.after_ss_name = cfg["ss_options"]["after_ss_name"]
-            self.before_number = cfg["ss_options"]["before_number"]
-            self.after_number = cfg["ss_options"]["after_number"]
-            self.date_formatting = cfg["ss_options"]["date_formatting"]
-            self.use_system_local_date_naming = cfg["ss_options"]["use_system_local_date_naming"]
-            self.png_compression_level = cfg["ss_options"]["png_compression_level"]
-            self.default_screen = cfg["ss_options"]["default_screen"]
-            self.save_clipboard = cfg["ss_options"]["save_clipboard"]
+            self.ss_extension = cfg["ss_handler"]["ss_options"]["ss_extension"]
+            self.png_compression_level = cfg["ss_handler"]["ss_options"]["png_compression_level"]
+            self.default_screen = cfg["ss_handler"]["ss_options"]["default_screen"]
+            self.save_clipboard = cfg["ss_handler"]["ss_options"]["save_clipboard"]
 
         except Exception as e:
             print(e)
@@ -77,8 +87,9 @@ class Qshot(QWidget):
 
     def init_ui(self):
         """inits ui"""
-
         # set main frame options
+        self.setWindowTitle("Quickshot")
+        self.setWindowIcon(QtGui.QIcon(self.icon_path))
         self.setStyleSheet(self.window_style)
         self.setWindowOpacity(self.opacity)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
@@ -414,14 +425,13 @@ class Qshot(QWidget):
             bbox = self.geometry().getRect()
             bbox = {"top": bbox[1], "left" : bbox[0], "width" : bbox[2], "height" : bbox[3]}
             
-            # hide and save the previous size
+            # hide
             self.hide()
-            size = self.size()
+            # delay the frame visibility, on linux display compositor causes problems without delay
+            time.sleep(self.frame_delay)
             ss_state, ss_info = self.ss_handler.take_ss(ss_bbox=bbox)
-
-            # show and resize it back
+            # show
             self.show()
-            # self.resize(self.size())
  
         else:
             ss_state, ss_info = self.ss_handler.take_ss()

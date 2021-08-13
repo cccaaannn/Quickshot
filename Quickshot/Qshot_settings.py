@@ -1,12 +1,12 @@
 # pyqt5
-from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QComboBox, QSpinBox, QSlider, QCheckBox, QPushButton, QMessageBox, QGroupBox, QColorDialog, QFileDialog, QAction
+from PyQt5.QtWidgets import QLabel, QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox, QSlider, QCheckBox, QPushButton, QMessageBox, QGroupBox, QColorDialog, QFileDialog, QAction
 from PyQt5.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QHBoxLayout, QGridLayout
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QFont
 
 # other imports
-import json
+import yaml
 import sys
 import os
 
@@ -89,8 +89,8 @@ a+b+c
         """
 Save path for the screenshots.
 
-'HOME' tries to find user desktop or home automatically.
-Leave it empty if you want the screenshot to be saved in the Quickshots directory.
+'HOME' tries to find user home automatically.
+Leave it empty if you want the screenshot to be saved in the Quickshot's installation directory.
         """,
 
         "root_file" : 
@@ -173,7 +173,14 @@ Higher the level is smaller the png images will be.
 When Quickshot is hidden it takes fullscreen screenshots, select default screen for full screen screenshots.
 If 'All' box is checked Quickshot takes screenshot from all screens and combines them.
         """,
-        
+
+        "frame_delay" :
+        """
+Window invisibility delay in seconds.
+Quickshot makes itself invisible while taking screenshots, on Linux some display compositors requires some delay before taking screenshot for animations to complate.
+If Quickshot's frame is visible on your screenshots increase this delay.
+        """,
+
         "save_clipboard" :  
         """
 Copies screenshot to clipboard.
@@ -182,58 +189,80 @@ Copies screenshot to clipboard.
         }
 
         self.about_text = """
-Quickshot is a simple, quick, customizable screenshot tool.
-
+Quickshot is a simple, portable, customizable screenshot tool.
 <br/><br/>
-It is an open-sourced application you can check the <a href='https://github.com/cccaaannn/Quickshot'>Quickshot github</a> page.
+Quickshot is an open-source application you can check the Quickshot <a href='https://github.com/cccaaannn/Quickshot'>github</a> page.
+<br/><br/>
+Author: Can Kurt
         """
         
         self.default_cfg = {
-                            "general":{
-                                "background_color": "#000000",
-                                "accent_color": "#ffffff",
-                                "opacity" : 0.5,
-                                "ss_hotkey" : "<alt>+s",
-                                "hide_hotkey" : "<alt>+h"
+                            "quickshot_frame": {
+                                "theme": {
+                                    "accent_color": "#ffffff",
+                                    "background_color": "#000000",
+                                    "opacity": 0.5
+                                },
+                                "hotkeys": {
+                                    "hide_hotkey": "<alt>+h",
+                                    "ss_hotkey": "<alt>+s"
+                                },
+                                "utilities": {
+                                    "frame_delay": 0
+                                }
                             },
-                            "ss_options":{
-                                "ss_extension" : ".png",
-                                "save_path" : "HOME", 
-                                "create_root_file" : "Qshot", 
-                                "before_ss_name" : "qs_", 
-                                "after_ss_name" : "", 
-                                "before_number" : "(", 
-                                "after_number" : ")", 
-                                "date_formatting" : "%y-%B-%d_%H-%M",
-                                "use_system_local_date_naming" : 1,
-                                "png_compression_level" : 9, 
-                                "default_screen" : 1,
-                                "save_clipboard" : 1
+                            "ss_handler": {
+                                "naming": {
+                                    "save_path": "HOME",
+                                    "create_root_file": "Qshot",
+                                    "after_number": ")",
+                                    "before_number": "(",
+                                    "before_ss_name": "qs_",
+                                    "after_ss_name": "",
+                                    "date_formatting": "%y-%B-%d_%H-%M",
+                                    "use_system_local_date_naming": 1
+                                },
+                                "ss_options": {
+                                    "ss_extension": ".png",
+                                    "png_compression_level": 9,
+                                    "default_screen": 1,
+                                    "save_clipboard": 1
+                                }          
                             }
                         }
 
         self.new_cfg = {
-                            "general":{
-                                "background_color" : "",
-                                "accent_color" : "", 
-                                "opacity" : "",
-                                "ss_hotkey" : "",
-                                "hide_hotkey" : ""
+                            "quickshot_frame": {
+                                "theme": {
+                                    "accent_color": "",
+                                    "background_color": "",
+                                    "opacity": ""
+                                },
+                                "hotkeys": {
+                                    "hide_hotkey": "",
+                                    "ss_hotkey": ""
+                                },
+                                "utilities": {
+                                    "frame_delay": 0
+                                }
                             },
-                        
-                            "ss_options":{
-                                "ss_extension" : "",
-                                "save_path" : "", 
-                                "create_root_file" : "", 
-                                "before_ss_name" : "", 
-                                "after_ss_name" : "", 
-                                "before_number" : "", 
-                                "after_number" : "", 
-                                "date_formatting" : "",
-                                "use_system_local_date_naming" : 0,
-                                "png_compression_level" : 9, 
-                                "default_screen" : 1,
-                                "save_clipboard" : 0
+                            "ss_handler": {
+                                "naming": {
+                                    "save_path": "",
+                                    "create_root_file": "",
+                                    "after_number": "",
+                                    "before_number": "",
+                                    "before_ss_name": "",
+                                    "after_ss_name": "",
+                                    "date_formatting": "",
+                                    "use_system_local_date_naming": 0
+                                },
+                                "ss_options": {
+                                    "ss_extension": "",
+                                    "png_compression_level": 9,
+                                    "default_screen": 0,
+                                    "save_clipboard": 1
+                                }          
                             }
                         }
 
@@ -247,28 +276,40 @@ It is an open-sourced application you can check the <a href='https://github.com/
         try:
             # read cfg file
             with open(self.cfg_path,"r") as file:
-                cfg = json.load(file)
+                cfg = yaml.safe_load(file)
 
-            # general
-            self.opacity = cfg["general"]["opacity"]
-            self.background_color = cfg["general"]["background_color"]
-            self.accent_color = cfg["general"]["accent_color"]
-            self.ss_hotkey = cfg["general"]["ss_hotkey"]
-            self.hide_hotkey = cfg["general"]["hide_hotkey"]
 
-            # ss options
-            self.ss_extension = cfg["ss_options"]["ss_extension"]
-            self.save_path = os.path.normpath(cfg["ss_options"]["save_path"]) # convert to path
-            self.create_root_file = cfg["ss_options"]["create_root_file"]
-            self.before_ss_name = cfg["ss_options"]["before_ss_name"]
-            self.after_ss_name = cfg["ss_options"]["after_ss_name"]
-            self.before_number = cfg["ss_options"]["before_number"]
-            self.after_number = cfg["ss_options"]["after_number"]
-            self.date_formatting = cfg["ss_options"]["date_formatting"]
-            self.use_system_local_date_naming = cfg["ss_options"]["use_system_local_date_naming"]
-            self.png_compression_level = cfg["ss_options"]["png_compression_level"]
-            self.default_screen = cfg["ss_options"]["default_screen"]
-            self.save_clipboard = cfg["ss_options"]["save_clipboard"]
+            # quickshot_frame
+            # theme
+            self.background_color = cfg["quickshot_frame"]["theme"]["background_color"]
+            self.accent_color = cfg["quickshot_frame"]["theme"]["accent_color"]
+            self.opacity = cfg["quickshot_frame"]["theme"]["opacity"]
+
+            # hotkeys
+            self.ss_hotkey = cfg["quickshot_frame"]["hotkeys"]["ss_hotkey"]
+            self.hide_hotkey = cfg["quickshot_frame"]["hotkeys"]["hide_hotkey"]
+
+            # utilities
+            self.frame_delay = cfg["quickshot_frame"]["utilities"]["frame_delay"]
+
+
+            # ss ss_handler
+            # naming
+            self.save_path = os.path.normpath(cfg["ss_handler"]["naming"]["save_path"]) # convert to path
+            self.create_root_file = cfg["ss_handler"]["naming"]["create_root_file"]
+            self.before_ss_name = cfg["ss_handler"]["naming"]["before_ss_name"]
+            self.after_ss_name = cfg["ss_handler"]["naming"]["after_ss_name"]
+            self.before_number = cfg["ss_handler"]["naming"]["before_number"]
+            self.after_number = cfg["ss_handler"]["naming"]["after_number"]
+            self.date_formatting = cfg["ss_handler"]["naming"]["date_formatting"]
+            self.use_system_local_date_naming = cfg["ss_handler"]["naming"]["use_system_local_date_naming"]
+
+            # ss_options
+            self.ss_extension = cfg["ss_handler"]["ss_options"]["ss_extension"]
+            self.png_compression_level = cfg["ss_handler"]["ss_options"]["png_compression_level"]
+            self.default_screen = cfg["ss_handler"]["ss_options"]["default_screen"]
+            self.save_clipboard = cfg["ss_handler"]["ss_options"]["save_clipboard"]
+
 
             return True
         except Exception as e:
@@ -279,7 +320,7 @@ It is an open-sourced application you can check the <a href='https://github.com/
     def variable_to_ui(self):
         """assigns local variables to ui"""
         try:
-            # colors and opacity
+            # theme and utilities
             self.opacity_slider.setSliderPosition(int(self.opacity * 100))
             self.background_color_line.setText(self.background_color)
             self.background_color_prew.setStyleSheet("background-color: {0};".format(self.background_color))
@@ -289,6 +330,9 @@ It is an open-sourced application you can check the <a href='https://github.com/
             # hotkeys
             self.ss_key_line.setText(self.ss_hotkey)
             self.hide_key.setText(self.hide_hotkey)
+
+            # set the frame delay
+            self.frame_delay_selector.setValue(self.frame_delay)
 
             # path and naming
             self.save_path_line.setText(self.save_path)
@@ -334,43 +378,45 @@ It is an open-sourced application you can check the <a href='https://github.com/
         """assign selected settings to new_cfg variable"""
         try:
             # colors and opacity
-            self.new_cfg["general"]["opacity"] = self.opacity_slider.value() / 100
-            self.new_cfg["general"]["background_color"] = self.background_color_line.text()
-            self.new_cfg["general"]["accent_color"] = self.accent_color_line.text()
+            self.new_cfg["quickshot_frame"]["theme"]["background_color"] = self.background_color_line.text()
+            self.new_cfg["quickshot_frame"]["theme"]["accent_color"] = self.accent_color_line.text()
+            self.new_cfg["quickshot_frame"]["theme"]["opacity"] = self.opacity_slider.value() / 100
 
             # hotkeys
-            self.new_cfg["general"]["ss_hotkey"] = self.ss_key_line.text()
-            self.new_cfg["general"]["hide_hotkey"] = self.hide_key.text()
+            self.new_cfg["quickshot_frame"]["hotkeys"]["ss_hotkey"] = self.ss_key_line.text()
+            self.new_cfg["quickshot_frame"]["hotkeys"]["hide_hotkey"] = self.hide_key.text()
 
+            # set the frame delay
+            self.new_cfg["quickshot_frame"]["utilities"]["frame_delay"] = self.frame_delay_selector.value()
 
             # path and naming
-            self.new_cfg["ss_options"]["save_path"] = self.save_path_line.text()
-            self.new_cfg["ss_options"]["create_root_file"] = self.root_file_line.text()
-            self.new_cfg["ss_options"]["before_ss_name"] = self.before_ss_name_line.text()
-            self.new_cfg["ss_options"]["after_ss_name"] = self.after_ss_name_line.text()
-            self.new_cfg["ss_options"]["before_number"] = self.before_number_line.text()
-            self.new_cfg["ss_options"]["after_number"] = self.after_number_line.text()
-            self.new_cfg["ss_options"]["date_formatting"] = self.date_formatting_line.text()
+            self.new_cfg["ss_handler"]["naming"]["save_path"] = self.save_path_line.text()
+            self.new_cfg["ss_handler"]["naming"]["create_root_file"] = self.root_file_line.text()
+            self.new_cfg["ss_handler"]["naming"]["before_ss_name"] = self.before_ss_name_line.text()
+            self.new_cfg["ss_handler"]["naming"]["after_ss_name"] = self.after_ss_name_line.text()
+            self.new_cfg["ss_handler"]["naming"]["before_number"] = self.before_number_line.text()
+            self.new_cfg["ss_handler"]["naming"]["after_number"] = self.after_number_line.text()
+            self.new_cfg["ss_handler"]["naming"]["date_formatting"] = self.date_formatting_line.text()
            
             if(self.local_date_naming_checkbox.isChecked()):
-                self.new_cfg["ss_options"]["use_system_local_date_naming"] = 1
+                self.new_cfg["ss_handler"]["naming"]["use_system_local_date_naming"] = 1
             else:
-                self.new_cfg["ss_options"]["use_system_local_date_naming"] = 0
+                self.new_cfg["ss_handler"]["naming"]["use_system_local_date_naming"] = 0
 
             # ss options
-            self.new_cfg["ss_options"]["ss_extension"] = self.extension_combobox.currentText()
+            self.new_cfg["ss_handler"]["ss_options"]["ss_extension"] = self.extension_combobox.currentText()
 
-            self.new_cfg["ss_options"]["png_compression_level"] = int(self.png_compression_combobox.currentText())
+            self.new_cfg["ss_handler"]["ss_options"]["png_compression_level"] = int(self.png_compression_combobox.currentText())
 
             if(self.all_screens_checkbox.isChecked()):
-                self.new_cfg["ss_options"]["default_screen"] = 0
+                self.new_cfg["ss_handler"]["ss_options"]["default_screen"] = 0
             else:
-                self.new_cfg["ss_options"]["default_screen"] = self.default_screen_selector.value()
+                self.new_cfg["ss_handler"]["ss_options"]["default_screen"] = self.default_screen_selector.value()
 
             if(self.save_clipboard_checkbox.isChecked()):
-                self.new_cfg["ss_options"]["save_clipboard"] = 1
+                self.new_cfg["ss_handler"]["ss_options"]["save_clipboard"] = 1
             else:
-                self.new_cfg["ss_options"]["save_clipboard"] = 0
+                self.new_cfg["ss_handler"]["ss_options"]["save_clipboard"] = 0
             
             return True
         except Exception as e:
@@ -381,7 +427,7 @@ It is an open-sourced application you can check the <a href='https://github.com/
     def write_cfg_file(self, cfg):
         try:
             with open(self.cfg_path, "w") as file:
-                json.dump(cfg, file, indent=4)
+                yaml.dump(cfg, file, indent=4)
             return True
         except Exception as e:
             print(e)
@@ -412,7 +458,7 @@ It is an open-sourced application you can check the <a href='https://github.com/
         self.setCentralWidget(self.central_widget)
 
     def block1(self):
-        self.block1_group_box = QGroupBox("Colors and opacity")
+        self.block1_group_box = QGroupBox("Theme and utility")
         self.block1_group_box.setToolTip(self.tooltips["colors_and_opacity"])
 
         b1 = QPushButton()
@@ -438,7 +484,7 @@ It is an open-sourced application you can check the <a href='https://github.com/
         self.accent_color_prew = QLabel()
         self.accent_color_prew.setMinimumSize(20,1)
 
-
+        # opacity
         l1 = QLabel()
         l1.setText("Opacity")
 
@@ -448,10 +494,21 @@ It is an open-sourced application you can check the <a href='https://github.com/
         self.opacity_label = QLabel()
         self.opacity_label.setText("10.0")
 
+        # Frame delay
+        l2 = QLabel()
+        l2.setText("Window invisibility time")
+        l2.setToolTip(self.tooltips["frame_delay"])
+
+        self.frame_delay_selector = QDoubleSpinBox()
+        self.frame_delay_selector.setMinimum(0.0)
+        self.frame_delay_selector.setSingleStep(0.1)
+        self.frame_delay_selector.setToolTip(self.tooltips["frame_delay"])
+
 
         hbox1 = QHBoxLayout()
         hbox2 = QHBoxLayout()
         hbox3 = QHBoxLayout()
+        hbox4 = QHBoxLayout()
         vbox = QVBoxLayout()
 
         hbox1.addWidget(b1)
@@ -467,10 +524,15 @@ It is an open-sourced application you can check the <a href='https://github.com/
         hbox3.addWidget(l1)
         hbox3.addWidget(self.opacity_label)
         hbox3.addWidget(self.opacity_slider)
+    
+        hbox4.addWidget(l2)
+        hbox4.addStretch()
+        hbox4.addWidget(self.frame_delay_selector)
 
         vbox.addLayout(hbox1)
         vbox.addLayout(hbox2)
         vbox.addLayout(hbox3)
+        vbox.addLayout(hbox4)
 
         self.block1_group_box.setLayout(vbox)
 
@@ -514,11 +576,8 @@ It is an open-sourced application you can check the <a href='https://github.com/
         self.block3_group_box = QGroupBox("Path and naming")
 
         # Save Path
-        # l1 = QLabel()
-        # l1.setText("Save Path")
-        # l1.setToolTip(self.tooltips["save_path"])
         b1 = QPushButton()
-        b1.setText("Chose save path")
+        b1.setText("Chose save folder")
         b1.setObjectName("save_path_button")
         b1.clicked.connect(self.on_click)
 
