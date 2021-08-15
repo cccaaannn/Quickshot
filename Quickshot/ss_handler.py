@@ -1,13 +1,16 @@
 from datetime import datetime
 from io import BytesIO
 from PIL import Image
-import win32clipboard
 import mss.tools
 import locale
 import mss
 import os
 
 class ss_handler():
+    """on linux ss_handler uses xclip to copy images to clipboard
+    https://github.com/astrand/xclip
+    """
+
     def __init__(self,     
     ss_extension = ".png",
     save_path = "HOME", 
@@ -70,23 +73,18 @@ class ss_handler():
 
     def __path_handler(self):
         """handles path"""
-        # if path is set to HOME try to get desktop
+        # if path is set to HOME try to get user home
         if(self.save_path == "HOME"):
             
             # windows
             if(os.name == "nt"):
                 save_path = os.getenv("HOMEPATH")
-                save_path = os.path.join(save_path, "Desktop")
 
                 if(not save_path):
                     save_path = os.path.expanduser(os.getenv('USERPROFILE'))
-                    save_path = os.path.join(save_path, "Desktop")
 
                     if(not save_path):
-                        save_path = os.getenv("HOMEPATH")
-
-                        if(not save_path):
-                            return False, "Path error: could not get Desktop path, you can give it manually"
+                        return False, "Path error: could not get users Home path, you can give it manually"
 
             # other os
             else:
@@ -114,18 +112,22 @@ class ss_handler():
 
 
     def __copy_image_to_clipboard(self, image_path):
-        """saves image to win32 clipboard"""
-        
-        image = Image.open(image_path)
-        output = BytesIO()
-        image.convert("RGB").save(output, "BMP")
-        data = output.getvalue()[14:]
-        output.close()
+        """saves image to clipboard, uses win32 package on windows xclip on linux"""
 
-        win32clipboard.OpenClipboard()
-        win32clipboard.EmptyClipboard()
-        win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
-        win32clipboard.CloseClipboard()
+        if(os.name == "nt"):
+            import win32clipboard
+            image = Image.open(image_path)
+            output = BytesIO()
+            image.convert("RGB").save(output, "BMP")
+            data = output.getvalue()[14:]
+            output.close()
+
+            win32clipboard.OpenClipboard()
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
+            win32clipboard.CloseClipboard()
+        else:
+            os.system('xclip -selection clipboard -t image/png -i "{0}"'.format(image_path))
 
 
     def to_jpg(self, raw_pixels, output = None):
