@@ -19,10 +19,12 @@ from ss_handler import ss_handler
 
 class Qshot(QWidget):
 
-    def __init__(self, cfg_path, icon_path):
+    def __init__(self, cfg_path, default_cfg_path, statics_path):
         super().__init__()
         self.cfg_path = cfg_path
-        self.icon_path = icon_path
+        self.default_cfg_path = default_cfg_path
+        self.statics_path = statics_path
+        self.icon_path = os.path.join(statics_path, "icons", "Qs.ico")
         self.set_options()
         
         self.init_variables()
@@ -82,7 +84,7 @@ class Qshot(QWidget):
         except Exception as e:
             print(e)
             self.show_alert_popup("There is a problem with cfg file")
-            start_settings_with_event_loop(self.cfg_path, self.icon_path) # start settings with its own event loop
+            start_settings_with_event_loop(self.cfg_path, self.default_cfg_path, self.statics_path) # start settings with its own event loop
             self.exit_app()
 
     def init_ui(self):
@@ -150,7 +152,7 @@ class Qshot(QWidget):
 
     def init_Qshot_settings(self):
         """intits Qshot settings and assigns local functions to emitters"""
-        self.Qs_settings = Qshot_settings(self.cfg_path, self.icon_path)
+        self.Qs_settings = Qshot_settings(self.cfg_path, self.default_cfg_path, self.statics_path)
         self.Qs_settings.oppcity_emitter.connect(self.change_opacity)
         self.Qs_settings.background_color_emitter.connect(self.change_background_color)
         self.Qs_settings.accent_color_emitter.connect(self.change_accent_color)

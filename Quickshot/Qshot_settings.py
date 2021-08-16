@@ -7,6 +7,7 @@ from PyQt5.QtGui import QFont
 
 # other imports
 import yaml
+import copy
 import sys
 import os
 
@@ -19,10 +20,13 @@ class Qshot_settings(QMainWindow):
     update_frame_emitter = pyqtSignal()
     hide_frame_emitter = pyqtSignal(bool)
 
-    def __init__(self, cfg_path, icon_path):
+    def __init__(self, cfg_path, default_cfg_path, statics_path):
         super().__init__()
         self.cfg_path = cfg_path
-        self.icon_path = icon_path
+        self.default_cfg_path = default_cfg_path
+        self.tooltips_path = os.path.join(statics_path, "texts", "tooltips.yaml")
+        self.about_path = os.path.join(statics_path, "texts", "about.txt")
+        self.icon_path = os.path.join(statics_path, "icons", "Qs.ico")
 
         self.is_settings_started = False
 
@@ -33,8 +37,11 @@ class Qshot_settings(QMainWindow):
         this is not in the constructor because it slows startup of the main frame
         and if there is an error on the cfg file I want settings popup after main frames popup
         """
-        self.is_settings_started = True # once frame started I don't want to recreate it again
+        self.is_settings_started = True # once frame started I don't want to recreate it again (this variable used in the Quickshot.py)
         self.init_variables()
+        self.set_static_variables()
+        self.set_default_cfg()
+
         self.init_ui()
 
         cfg_status = self.read_cfg_file()
@@ -67,205 +74,6 @@ class Qshot_settings(QMainWindow):
         """inits class variables"""
         self.ss_extensions_list = [".png", ".jpg"]
         self.png_compression_level_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
-
-        self.tooltips = {
-        "colors_and_opacity" :
-        """
-Color and opacity settings.
-        """,
-
-        "hotkeys" : 
-        """
-Specify hotkeys.
-Use <> on metakeys and + for adding more keys.
-Leave it empty if you don't want.
-
-ex: 
-a+b+c
-<ctrl>+<space>
-        """,
-
-        "save_path" : 
-        """
-Save path for the screenshots.
-
-'HOME' tries to find user home automatically.
-Leave it empty if you want the screenshot to be saved in the Quickshot's installation directory.
-        """,
-
-        "root_file" : 
-        """
-Root filename for screenshots.
-Specify a filename for screenshots to be saved, 
-it will be created under the save path you specified.
-Leave it empty if you don't want.
-        """,
-
-        "text_before_ss-text_after_ss" : 
-        """
-Text before and after the screenshot name.
-Specify a text for placing before and after screenshot name.
-Leave it empty if you don't want.
-
-ex: 
-(20_01_01).png  
-screen_shot_20_01_01_end_of_ss.png
-        """,
-        
-        "text_before_ss_number-text_after_ss_number" : 
-        """
-Text before and after screenshot number.
-If multiple screenshots exists with the same name new one will be numbered, 
-you can specify what text will be before and after that number.
-Leave it empty if you don't want.
-
-ex: 
-qs_20_01_01(1).png  
-qs_20_01_01[1].png  
-qs_20_01_01-1.png         
-        """,
-
-        "date_formatting" : 
-        """
-Date formatting keywords
-
-%Y year full
-%y year 2 digit
-
-%m month digit
-%B month text
-
-%d day
-%A weekday long
-%a weekday short
-
-%H hour 24
-%I hour 12
-%p am/pm
-%M minute
-%S second
-
-ex: 
-%Y-%m-%d_%H-%M 
-2020-01-01_01-00.png
-
-%y-%B-%d-%A 
-20-January-01-Mon.png
-        """,
-
-        "Use_local_date_naming" : 
-        """
-Check if you want date names to be your systems language.
-        """,
-
-        "extension" : 
-        """
-Extension of the screenshots.
-        """,
-
-        "png_compression_level" :
-        """
-Higher the level is smaller the png images will be.
-        """,
-
-        "default_screen" :
-        """
-When Quickshot is hidden it takes fullscreen screenshots, select default screen for full screen screenshots.
-If 'All' box is checked Quickshot takes screenshot from all screens and combines them.
-        """,
-
-        "frame_delay" :
-        """
-Window invisibility delay in seconds.
-Quickshot makes itself invisible while taking screenshots, on Linux some display compositors requires some delay before taking screenshot for animations to complate.
-If Quickshot's frame is visible on your screenshots increase this delay.
-        """,
-
-        "save_clipboard" :  
-        """
-Copies screenshot to clipboard.
-        """
-
-        }
-
-        self.about_text = """
-Quickshot is a simple, portable, customizable screenshot tool.
-<br/><br/>
-Quickshot is an open-source application you can check the Quickshot <a href='https://github.com/cccaaannn/Quickshot'>github</a> page.
-<br/><br/>
-Author: Can Kurt
-        """
-        
-        self.default_cfg = {
-                            "quickshot_frame": {
-                                "theme": {
-                                    "accent_color": "#ffffff",
-                                    "background_color": "#000000",
-                                    "opacity": 0.5
-                                },
-                                "hotkeys": {
-                                    "hide_hotkey": "<alt>+h",
-                                    "ss_hotkey": "<alt>+s"
-                                },
-                                "utilities": {
-                                    "frame_delay": 0
-                                }
-                            },
-                            "ss_handler": {
-                                "naming": {
-                                    "save_path": "HOME",
-                                    "create_root_file": "Qshot",
-                                    "after_number": ")",
-                                    "before_number": "(",
-                                    "before_ss_name": "qs_",
-                                    "after_ss_name": "",
-                                    "date_formatting": "%y-%B-%d_%H-%M",
-                                    "use_system_local_date_naming": 1
-                                },
-                                "ss_options": {
-                                    "ss_extension": ".png",
-                                    "png_compression_level": 9,
-                                    "default_screen": 1,
-                                    "save_clipboard": 1
-                                }          
-                            }
-                        }
-
-        self.new_cfg = {
-                            "quickshot_frame": {
-                                "theme": {
-                                    "accent_color": "",
-                                    "background_color": "",
-                                    "opacity": ""
-                                },
-                                "hotkeys": {
-                                    "hide_hotkey": "",
-                                    "ss_hotkey": ""
-                                },
-                                "utilities": {
-                                    "frame_delay": 0
-                                }
-                            },
-                            "ss_handler": {
-                                "naming": {
-                                    "save_path": "",
-                                    "create_root_file": "",
-                                    "after_number": "",
-                                    "before_number": "",
-                                    "before_ss_name": "",
-                                    "after_ss_name": "",
-                                    "date_formatting": "",
-                                    "use_system_local_date_naming": 0
-                                },
-                                "ss_options": {
-                                    "ss_extension": "",
-                                    "png_compression_level": 9,
-                                    "default_screen": 0,
-                                    "save_clipboard": 1
-                                }          
-                            }
-                        }
-
 
 
     # read options and assign to local variable (file -> ui)
@@ -433,6 +241,34 @@ Author: Can Kurt
             print(e)
             self.show_alert_popup("There is a problem with saving values please check the values or reset settings")
             return False
+
+    def set_default_cfg(self):
+        """Reads default_cfg_file and sets default_cfg and new_cfg"""
+        try:
+            # read default_cfg_file
+            with open(self.default_cfg_path, "r") as file:
+                self.default_cfg = yaml.safe_load(file)
+
+            # new_cfg is just a copy of default_cfg but has to be deep copy, it is going to be changed according to ui
+            self.new_cfg = copy.deepcopy(self.default_cfg)
+
+        except Exception as e:
+            print(e)
+            self.show_alert_popup("There is a problem with installation, please reinstall the application.")
+            self.close()
+
+    def set_static_variables(self):
+        """Reads and sets set_static_variables"""
+        try:
+            with open(self.tooltips_path, "r") as file:
+                self.tooltips = yaml.safe_load(file)
+
+            with open(self.about_path, "r") as file:
+                self.about_text = file.read()
+        except Exception as e:
+            print(e)
+            self.show_alert_popup("There is a problem with installation, please reinstall the application.")
+            self.close()
 
 
 
@@ -963,11 +799,11 @@ Author: Can Kurt
 
 
 
-def start_settings_with_event_loop(cfg_path, icon_path):
+def start_settings_with_event_loop(cfg_path, default_cfg_path, statics_path):
     """if the main window can not open because of the cfg file is being broken, settings needs its own event loop to stay open"""
     application = QApplication(sys.argv)    
 
-    settings = Qshot_settings(cfg_path, icon_path)
+    settings = Qshot_settings(cfg_path, default_cfg_path, statics_path)
     settings.start_settings()
 
     sys.exit(application.exec_())
