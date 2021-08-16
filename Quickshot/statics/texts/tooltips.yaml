@@ -1,0 +1,68 @@
+---
+colors_and_opacity: Color and opacity settings.
+hotkeys: |
+  Specify hotkeys.
+  Use <> on metakeys and + for adding more keys.
+  Leave it empty if you don't want.
+
+  ex:
+  a+b+c
+  <ctrl>+<space>
+save_path: |-
+  Save path for the screenshots.
+
+  'HOME' tries to find user home automatically.
+  Leave it empty if you want the screenshot to be saved in the Quickshot's installation directory.
+root_file: |-
+  Root filename for screenshots.
+  Specify a filename for screenshots to be saved,
+  it will be created under the save path you specified.
+  Leave it empty if you don't want.
+text_before_ss-text_after_ss: |-
+  Text before and after the screenshot name.
+  Specify a text for placing before and after screenshot name.
+  Leave it empty if you don't want.
+
+  ex:
+  (20_01_01).png
+  screen_shot_20_01_01_end_of_ss.png
+text_before_ss_number-text_after_ss_number: "Text before and after screenshot number.\nIf
+  multiple screenshots exists with the same name new one will be numbered,\nyou can
+  specify what text will be before and after that number.\nLeave it empty if you don't
+  want.\n\nex:\nqs_20_01_01(1).png\nqs_20_01_01[1].png\nqs_20_01_01-1.png      "
+date_formatting: |-
+  Date formatting keywords
+
+  %Y year full
+  %y year 2 digit
+
+  %m month digit
+  %B month text
+
+  %d day
+  %A weekday long
+  %a weekday short
+
+  %H hour 24
+  %I hour 12
+  %p am/pm
+  %M minute
+  %S second
+
+  ex:
+  %Y-%m-%d_%H-%M
+  2020-01-01_01-00.png
+
+  %y-%B-%d-%A
+  20-January-01-Mon.png
+Use_local_date_naming: Check if you want date names to be your systems language.
+extension: Extension of the screenshots.
+png_compression_level: Higher the level is smaller the png images will be.
+default_screen: |-
+  When Quickshot is hidden it takes fullscreen screenshots, select default screen for full screen screenshots.
+  If 'All' box is checked Quickshot takes screenshot from all screens and combines them.
+frame_delay: |-
+  Window invisibility delay in seconds.
+  Quickshot makes itself invisible while taking screenshots, on Linux some display compositors requires some delay before taking screenshot for animations to complate.
+  If Quickshot's frame is visible on your screenshots increase this delay.
+save_clipboard: Copies screenshot to clipboard.

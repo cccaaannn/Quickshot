@@ -1,0 +1,5 @@
+Quickshot is a simple, portable, customizable screenshot tool.
+<br/><br/>
+Quickshot is an open-source application you can check the Quickshot <a href='https://github.com/cccaaannn/Quickshot'>github</a> page.
+<br/><br/>
+Author: Can Kurt
