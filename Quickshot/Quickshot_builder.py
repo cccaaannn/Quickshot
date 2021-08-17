@@ -38,7 +38,7 @@ class Quickshot_builder():
             # use this for compiling for windows msix package
             # uses Home/user directory for cfg file since msix files can not be changed
 
-            cfg_path = Quickshot_builder.create_cfg_on_user_home(cfg_from="cfg\\Qshot_default.cfg", cfg_to=".Quickshot\\cfg\\Qshot.cfg")
+            cfg_path = Quickshot_builder.create_cfgs_on_user_home(cfg_path_from="cfg", cfg_name_from="Qshot_default.cfg", cfg_path_to=".Quickshot\\cfg", cfg_name_to="Qshot.cfg")
             app_abs_path = os.path.dirname(os.path.realpath(__file__))
             Quickshot_builder.build_application(cfg_path, os.path.join(app_abs_path, "cfg/Qshot_default.cfg"), os.path.join(app_abs_path, "statics"))
 
@@ -46,15 +46,30 @@ class Quickshot_builder():
             # use this for compiling for linux appimage 
             # uses Home/user directory for cfg file since appimages can not be changed
 
-            cfg_path = Quickshot_builder.create_cfg_on_user_home(cfg_from="cfg/Qshot_default.cfg", cfg_to=".Quickshot/cfg/Qshot.cfg")
+            cfg_path = Quickshot_builder.create_cfgs_on_user_home(cfg_path_from="cfg", cfg_name_from="Qshot_default.cfg", cfg_path_to=".Quickshot/cfg", cfg_name_to="Qshot.cfg")
             Quickshot_builder.build_application(cfg_path, "cfg/Qshot_default.cfg", "statics")
 
 
     @staticmethod
-    def create_cfg_on_user_home(cfg_from, cfg_to):
-        # Works on Windows and Linux 
-        # Creates cfg file with the name given in th cfg_file_name, also creates parent folders in the quickshot_save_folder
-        # Reads options on the default_cfg_path writes them to cfg_file_name file under quickshot_save_folder
+    def copy_file(file_from, file_to):
+        """copies a file, since coping can require higher than user privileges this function reads and writes the file back"""
+        with open(file_from,"rb") as file:
+            content = file.read()
+
+        with open(file_to, "wb") as file:
+            file.write(content)
+
+    @staticmethod
+    def create_cfgs_on_user_home(cfg_path_from, cfg_name_from, cfg_path_to, cfg_name_to, version_file = "versions.cfg"):
+        """
+        Works on cross platform
+        Checks cfg files existence and version then copies cfg files from the app to users HOME if needed
+        
+        cfg_path_from : cfg path from relative to apps location
+        cfg_name_from : cfg name from
+        cfg_path_to : cfg path to relative to users HOME
+        cfg_name_to : cfg name to
+        """
 
         # get user home cross platform 
         user_home = Path.home()
@@ -62,24 +77,45 @@ class Quickshot_builder():
         # get abs application path
         app_abs_path = os.path.dirname(os.path.realpath(__file__))  
         
-        # copy cfg from
-        cfg_from = os.path.join(app_abs_path, cfg_from)
+        # paths from
+        cfg_folder_from = os.path.join(app_abs_path, cfg_path_from) # relative to applications path
+        cfg_file_from = os.path.join(cfg_folder_from, cfg_name_from)
+        version_file_from = os.path.join(cfg_folder_from, version_file)
 
-        # copy cfg to
-        cfg_to = os.path.join(user_home, cfg_to)
+        # paths to
+        cfg_folder_to = os.path.join(user_home, cfg_path_to) # relative to users HOME
+        cfg_file_to = os.path.join(cfg_folder_to, cfg_name_to)
+        version_file_to = os.path.join(cfg_folder_to, version_file)
 
-        # if cfg file does not exits
-        if(not os.path.isfile(cfg_to)):
+        # if any of the cfg files don't exists copy from application
+        if(not os.path.isfile(cfg_file_to) or not os.path.isfile(version_file_to)):
+            print("Required cfg files could not be found, creating cfg files under {}".format(cfg_folder_to))
+
             # create parent folders
-            cfg_to_path, _ = os.path.split(cfg_to)
-            Path(cfg_to_path).mkdir(parents=True, exist_ok=True)
+            Path(cfg_folder_to).mkdir(parents=True, exist_ok=True)
 
-            # read default cfg file
-            with open(cfg_from,"r") as file:
-                cfg = yaml.safe_load(file)
+            # copy cfg files
+            Quickshot_builder.copy_file(cfg_file_from, cfg_file_to)
+            Quickshot_builder.copy_file(version_file_from, version_file_to)
 
-            # write default cfg file contents to actual cfg file on the path
-            with open(cfg_to, "w") as file:
-                yaml.dump(cfg, file, indent=4)
-        
-        return cfg_to
+        # if cfg versions don't match copy from application
+        else:
+            with open(version_file_to, "r") as file:
+                versions_on_system = yaml.safe_load(file)
+            
+            with open(version_file_from, "r") as file:
+                versions_on_app = yaml.safe_load(file)
+            
+            cfg_version_on_system = versions_on_system["cfg_version"]
+            cfg_version_on_app = versions_on_app["cfg_version"]
+
+            if(cfg_version_on_system != cfg_version_on_app):
+                print("cfg version on the system is different than the apps current cfg version, replacing cfg files under {}".format(cfg_folder_to))
+
+                # copy cfg files
+                Quickshot_builder.copy_file(cfg_file_from, cfg_file_to)
+                Quickshot_builder.copy_file(version_file_from, version_file_to)
+
+
+        return cfg_file_to
+
