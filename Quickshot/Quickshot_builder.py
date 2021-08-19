@@ -60,7 +60,7 @@ class Quickshot_builder():
             file.write(content)
 
     @staticmethod
-    def create_cfgs_on_user_home(cfg_path_from, cfg_name_from, cfg_path_to, cfg_name_to, version_file = "versions.cfg"):
+    def create_cfgs_on_user_home(cfg_path_from, cfg_name_from, cfg_path_to, cfg_name_to):
         """
         Works on cross platform
         Checks cfg files existence and version then copies cfg files from the app to users HOME if needed
@@ -70,6 +70,8 @@ class Quickshot_builder():
         cfg_path_to : cfg path to relative to users HOME
         cfg_name_to : cfg name to
         """
+        # if cfg version key is not exists use this (for old cfg files that des not have version)
+        cfg_fallback_version = { "cfg_version": "1.0" }
 
         # get user home cross platform 
         user_home = Path.home()
@@ -80,15 +82,13 @@ class Quickshot_builder():
         # paths from
         cfg_folder_from = os.path.join(app_abs_path, cfg_path_from) # relative to applications path
         cfg_file_from = os.path.join(cfg_folder_from, cfg_name_from)
-        version_file_from = os.path.join(cfg_folder_from, version_file)
 
         # paths to
         cfg_folder_to = os.path.join(user_home, cfg_path_to) # relative to users HOME
         cfg_file_to = os.path.join(cfg_folder_to, cfg_name_to)
-        version_file_to = os.path.join(cfg_folder_to, version_file)
 
         # if any of the cfg files don't exists copy from application
-        if(not os.path.isfile(cfg_file_to) or not os.path.isfile(version_file_to)):
+        if(not os.path.isfile(cfg_file_to)):
             print("Required cfg files could not be found, creating cfg files under {}".format(cfg_folder_to))
 
             # create parent folders
@@ -96,26 +96,23 @@ class Quickshot_builder():
 
             # copy cfg files
             Quickshot_builder.copy_file(cfg_file_from, cfg_file_to)
-            Quickshot_builder.copy_file(version_file_from, version_file_to)
 
         # if cfg versions don't match copy from application
         else:
-            with open(version_file_to, "r") as file:
-                versions_on_system = yaml.safe_load(file)
-            
-            with open(version_file_from, "r") as file:
+            with open(cfg_file_from, "r") as file:
                 versions_on_app = yaml.safe_load(file)
-            
-            cfg_version_on_system = versions_on_system["cfg_version"]
-            cfg_version_on_app = versions_on_app["cfg_version"]
+
+            with open(cfg_file_to, "r") as file:
+                versions_on_system = yaml.safe_load(file)
+
+            cfg_version_on_app = versions_on_app["versions"]["cfg_version"]
+            cfg_version_on_system = versions_on_system.get("versions", cfg_fallback_version).get("cfg_version") # get allows us to pass a defauşt value, so if cfg file is old and does not have version key this is not going to die.
 
             if(cfg_version_on_system != cfg_version_on_app):
-                print("cfg version on the system is different than the apps current cfg version, replacing cfg files under {}".format(cfg_folder_to))
+                print("cfg version on the system '{}' is different than the apps current cfg version '{}', replacing cfg files under {}".format(cfg_version_on_system, cfg_version_on_app, cfg_folder_to))
 
                 # copy cfg files
                 Quickshot_builder.copy_file(cfg_file_from, cfg_file_to)
-                Quickshot_builder.copy_file(version_file_from, version_file_to)
-
 
         return cfg_file_to
 
