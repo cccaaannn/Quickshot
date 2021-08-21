@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from io import BytesIO
 from PIL import Image
 import mss.tools
@@ -75,32 +76,18 @@ class ss_handler():
         """handles path"""
         # if path is set to HOME try to get user home
         if(self.save_path == "HOME"):
-            
-            # windows
-            if(os.name == "nt"):
-                save_path = os.getenv("HOMEPATH")
-
-                if(not save_path):
-                    save_path = os.path.expanduser(os.getenv('USERPROFILE'))
-
-                    if(not save_path):
-                        return False, "Path error: could not get users Home path, you can give it manually"
-
-            # other os
-            else:
-                save_path = os.getenv("HOME")
-                if(not save_path):
-                    return False, "Path error: could not get Home path, you can give it manually"
+            save_path = Path.home()
+            if(not save_path):
+                return False, "Path error: could not get Home path, you can give it manually"
 
         elif(self.save_path == ""):
             save_path = ""
-        
+
         else:
             if(os.path.exists(self.save_path)):
                 save_path = self.save_path
             else:
                 return False, "Path error: path does not exists"
-                
 
         # create root file
         if(self.create_root_file):
