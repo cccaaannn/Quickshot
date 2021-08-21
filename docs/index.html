@@ -27,7 +27,7 @@
         <div class="content">
 
             <h1>Quickshot</h1>
-            <p>A simple, portable, customizable screenshot tool. It is an open-sourced application you can check the <a href='https://github.com/cccaaannn/Quickshot'>Quickshot github</a> page.</p>
+            <p>A simple, portable, customizable screenshot tool. It is an open-source application you can check the <a target="_blank" rel="noreferrer" href='https://github.com/cccaaannn/Quickshot'>Quickshot github</a> page.</p>
 
             <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/cccaaannn/Quickshot?style=flat-square">
             <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/cccaaannn/Quickshot?style=flat-square">
@@ -36,38 +36,86 @@
             <hr>
 
             <h3>Download</h3>
-            <button onclick="location.href='https://github.com/cccaaannn/Quickshot/releases/latest/download/QuickshotSetup.exe'">QuickshotSetup.exe</button>
-            <button onclick="location.href='https://github.com/cccaaannn/Quickshot/releases/latest/download/Quickshot.zip'">Quickshot.zip</button>
+            
+            <h4>Windows</h4>
+            <p><a href="https://github.com/cccaaannn/Quickshot/releases/latest/download/QuickshotSetup.exe">QuickshotSetup.exe</a> | win32 installer (recommended)</p>
+            <p><a href="https://github.com/cccaaannn/Quickshot/releases/latest/download/Quickshot.msix">Quickshot.msix</a> | msix installer</p>
+            <p><a href="https://github.com/cccaaannn/Quickshot/releases/latest/download/Quickshot.zip">Quickshot.zip</a> | portable</p>
+            <h4>Linux</h4>
+            <p><a href="https://github.com/cccaaannn/Quickshot/releases/latest/download/Quickshot-x86_64.AppImage">Quickshot.AppImage</a> | check <a href="#linux">linux</a> support</p>
+            <br>
+            <p>Check <a href="#versions">versions</a> for more detail about versions.</p>
             <hr>
 
             <h3>Custom color Quickshot examples</h3>
-            <img src="src/images/example1.png" alt="drawing" width="250"/>
-            <img src="src/images/example2.png" alt="drawing" width="250"/>
-            <img src="src/images/example3.png" alt="drawing" width="250"/>
+            <img src="src/images/example1.png" alt="example1" width="250"/>
+            <img src="src/images/example2.png" alt="example2" width="250"/>
+            <img src="src/images/example3.png" alt="example3" width="250"/>
             <br/>
-            <img src="src/images/example5.png" alt="drawing" width="250"/>
-            <img src="src/images/example6.png" alt="drawing" width="250"/>
-            <img src="src/images/example7.png" alt="drawing" width="250"/>
+            <img src="src/images/example5.png" alt="example5" width="250"/>
+            <img src="src/images/example6.png" alt="example6" width="250"/>
+            <img src="src/images/example7.png" alt="example7" width="250"/>
             <hr>
 
             <h3>Quickshot has several customization options.</h3>
             <ul>
                 <li>Background, accent color and opacity customization.</li>
+                <br>
                 <li>Hotkey customization.</li>
+                <br>
                 <li>Multi screen support for full screen screenshots.</li>
+                <br>
                 <li>Clipboard support.</li>
+                <br>
                 <li>Screenshot save customizations</li>
                 <ul>
                     <li>Save name and path.</li>
-                    <li>Options for screenshot numbers.</li>
+                    <li>Options for screenshot numbering.</li>
                     <li>Date formatting.</li>
                     <li>Locale date naming.</li>
-                    <li>jpg or png extension support.</li>
+                    <li>jpg and png support.</li>
                 </ul>
             </ul>
 
-            <img src="src/images/settings_example1.png" alt="drawing" width="400"/>
-            <img src="src/images/settings_example2.png" alt="drawing" width="400"/>
+            <img src="src/images/settings_example1.png" alt="settings_example1" width="400"/>
+            <img src="src/images/settings_example2.png" alt="settings_example2" width="400"/>
+            <hr>
+
+            <h2 id="versions">Versions</h2>
+            <h3>Windows</h3>
+            <ul>
+                <li>win32 installer</li>
+                <ul>
+                    <li>This version has an <b>option</b> for adding shortcut to context menu, if selected you can not move the installation folder.</li>
+                </ul>
+                <br>        
+                <li>msix installer</li>
+                <ul>
+                    <li>msix packages needs to use another folder for saving settings since they can not be changed, this version saves settings to <b>C:\Users\USER\.Quickshot</b>.</li>
+                </ul>
+                <br>
+                <li>portable</li>
+                <ul>
+                    <li>Portable version without installer.</li>
+                </ul>
+            </ul>
+            <h3 id="linux">Linux</h3>
+
+            <li>AppImage <a target="_blank" rel="noreferrer" href='https://appimage.org/'>appimage.org</a></li>
+            <ul>
+                <li>AppImages needs to use another folder for saving settings since they can not be changed, this version saves settings to <b>/HOME/USER/.Quickshot</b>.</li>
+                <br>
+                <li>Extra dependencies</li>
+                <ul>
+                    <li>Clipboard function requires <a target="_blank" rel="noreferrer" href='https://github.com/astrand/xclip'>xclip</a> to be installed on Linux.</li>
+                </ul>
+                <br>        
+                <li>Known issues</li>
+                <ul>
+                    <li>Scaling display causes coordinate problems on screenshots on kde plasma but works on gnome 🤷🏻‍♂️.</li>
+                    <li>Some long animations causes Quickshot's frame to be visible on screenshots, use <b>Window invisibility time</b> option for delaying screenshot (or disable display compositor).</li>
+                </ul>
+            </ul>
             <hr>
 
         </div>
