@@ -1,0 +1,16 @@
+#!/bin/bash
+
+SELF=$(readlink -f "$0")
+HERE=${SELF%/*}
+EXEC="./Quickshot"
+
+# Move to app's directory
+cd ${HERE}/usr/bin/
+
+# Copy cfg file to Home/user/.Quickshot folder if not exists
+# CFGPATH="/home/$USER/.Quickshot/"
+# mkdir -p $CFGPATH && cp -nr cfg/ $CFGPATH
+# new version of the quickshot does this on the main function itself
+
+# Run app
+exec "${EXEC}"
