@@ -9,8 +9,8 @@ ___
 ## Features
 - **Fast**, no more choosing save path or name every time.
 - **Easy to use**, simple ui single button.
-- **Customizable**, see [Settings](#Settings).
-- **Portable**, all required files in one folder on a path that you choose. No registry bullshit.
+- **Customizable**, check [Settings](#Settings).
+- **Portable**, all required files in one folder on a path that you choose. check [versions](#versions).
 
 <br/>
 
@@ -34,12 +34,34 @@ Quickshot has several customization options.
 - Clipboard support.
 - Screenshot save customizations
     - Save name and path.
-    - Options for screenshot numbers.
+    - Options for screenshot numbering.
     - Date formatting.
     - Locale date naming.
-    - jpg or png extension support.
+    - jpg and png support.
 
 <br/>
 <img src="docs/src/images/settings_example1.png" alt="drawing" width="400"/><img src="docs/src/images/settings_example2.png" alt="drawing" width="400"/>
 <br/>
+<br/>
 
+
+## Versions
+
+## Windows
+- win32 installer
+    - This version has an **option** for adding shortcut to context menu, if selected you can not move the installation folder.
+- msix installer
+    - msix packages needs to use another folder for saving settings since they can not be changed, this version saves settings to `C:\Users\USER\.Quickshot`.
+- portable
+    - Portable version without installer.
+
+
+## Linux
+
+- AppImage | [appimage.org](https://appimage.org/)
+    - AppImages needs to use another folder for saving settings since they can not be changed, this version saves settings to `/HOME/USER/.Quickshot`.
+    - Extra dependencies
+        - Clipboard function requires [xclip](https://github.com/astrand/xclip) to be installed on Linux.
+    - Known issues
+        - Scaling display causes coordinate problems on screenshots on kde plasma but works on gnome 🤷🏻‍♂️.  
+        - Some long animations causes Quickshot's frame to be visible on screenshots, use `Window invisibility time` option for delaying screenshot (or disable display compositor). 
