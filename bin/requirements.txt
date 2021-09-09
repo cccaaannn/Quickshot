@@ -1,6 +1,0 @@
-pyqt5==5.14.2
-mss==6.1.0
-pynput==1.6.8
-Pillow==8.1.1
-pywin32==300
-pyinstaller==4.3
